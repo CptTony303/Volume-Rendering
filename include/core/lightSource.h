@@ -1,0 +1,7 @@
+class LightSource {
+public:
+	;
+
+private:
+	;
+};
