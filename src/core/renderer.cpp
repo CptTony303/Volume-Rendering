@@ -29,5 +29,4 @@ void Renderer::renderScene(){
     // Beende das Zeichnen von Dreiecken
     glEnd();
     //glFlush();
-    std::cout << glGetError() << std::endl;
 }

@@ -39,6 +39,12 @@ add_executable(VolumeRenderer ${SRCS} ${INCLUDE})
 add_subdirectory(lib/glfw)
 target_link_libraries(VolumeRenderer PRIVATE glfw)
 
+# Installiere GLM
+add_subdirectory(lib/glm)
+target_link_libraries(VolumeRenderer PRIVATE glm)
+
+
 # Füge OpenGL als Abhängigkeit hinzu
 find_package(OpenGL REQUIRED)
 target_link_libraries(VolumeRenderer PRIVATE OpenGL::GL)
+
