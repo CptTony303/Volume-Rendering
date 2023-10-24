@@ -1,0 +1,14 @@
+Determining if the include file pthread.h exists failed with the following output:
+Change Dir: X:/Anton/Projects/Programming/C/Volume-Rendering/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/MSBuild/Current/Bin/MSBuild.exe cmTC_b00b4.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=16.0 /v:m && Microsoft (R)-Build-Engine, Version 16.11.1+3e40a09f8 für .NET Framework
+Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
+
+  Microsoft (R) C/C++-Optimierungscompiler Version 19.29.30136 für x64
+  Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
+  CheckIncludeFile.c
+  cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_b00b4.dir\Debug\\" /Fd"cmTC_b00b4.dir\Debug\vc142.pdb" /external:W3 /Gd /TC /errorReport:queue "X:\Anton\Projects\Programming\C\Volume-Rendering\CMakeFiles\CMakeTmp\CheckIncludeFile.c"
+X:\Anton\Projects\Programming\C\Volume-Rendering\CMakeFiles\CMakeTmp\CheckIncludeFile.c(1,10): fatal error C1083: Datei (Include) kann nicht geöffnet werden: "pthread.h": No such file or directory [X:\Anton\Projects\Programming\C\Volume-Rendering\CMakeFiles\CMakeTmp\cmTC_b00b4.vcxproj]
+
+
+
