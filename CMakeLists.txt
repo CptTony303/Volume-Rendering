@@ -33,11 +33,16 @@ foreach(FILE ${SRCS})
     source_group("${GROUP}" FILES ${FILE})
 endforeach()
 
-add_executable(VolumeRenderer ${SRCS} ${INCLUDE})
+add_executable(VolumeRenderer ${SRCS} ${INCLUDE} lib/glad/src/glad.c lib/stb_image/stb_image.cpp)
 
 # Verknüpfe die Anwendung mit der GLFW-Bibliothek
 add_subdirectory(lib/glfw)
 target_link_libraries(VolumeRenderer PRIVATE glfw)
+
+#installiere GLAD
+include_directories(lib/glad/include)
+#add_executable(VolumeRenderer lib/glad/src/glad.c)
+#target_link_libraries(VolumeRenderer PRIVATE glad)
 
 # Installiere GLM
 add_subdirectory(lib/glm)
@@ -47,4 +52,10 @@ target_link_libraries(VolumeRenderer PRIVATE glm)
 # Füge OpenGL als Abhängigkeit hinzu
 find_package(OpenGL REQUIRED)
 target_link_libraries(VolumeRenderer PRIVATE OpenGL::GL)
+
+#stb_image
+include_directories(lib/stb_image/include)
+
+#load shader
+file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})
 

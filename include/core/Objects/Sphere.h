@@ -1,10 +1,12 @@
 #include <core/object.h>
-#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
+#include <core/ray.h>
 
 
 class Sphere {
 public:
 	Sphere(glm::vec3 center, float radius): _center(center), _radius(radius) {};
+	bool intersectWithRay(Ray ray, float* t);
 private:
 	glm::vec3 _center;
 	float _radius;

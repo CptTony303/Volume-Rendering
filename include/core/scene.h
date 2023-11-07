@@ -7,5 +7,5 @@ class Scene {
 		Scene();
 	private:
 		std::vector<Object> _objects;
-		vec3 _camera;
+		glm::vec3 _camera;
 };
