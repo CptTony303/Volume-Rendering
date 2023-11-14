@@ -38,11 +38,11 @@ vec4 rayMarch()
     {
         // Ray-Box-Intersection und Voxel-Wert-Abfrage hier implementieren
         vec3 texCoord = currentPosition+vec3(0.5f);
-        //vec3 reversedTexCoord = vec3(1.0 - texCoord.x, texCoord.z, texCoord.y);
+        vec3 reversedTexCoord = vec3(1.0 - texCoord.x, texCoord.z, texCoord.y);
         float density = texture(texture3, texCoord).r;
         if(density > isovalue){
             dist += distance(model * vec4(currentPosition, 1.f), model * vec4(modelPos,1.f));
-            vec3 color = modelPos;
+            vec3 color = texCoord;
             return vec4(color, 1.f);
         }
 

@@ -16,6 +16,8 @@ Renderer::Renderer(GLFWwindow* window) {
 
 void Renderer::init() {
 
+    char * projectPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/";
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -123,9 +125,10 @@ void Renderer::init() {
     Texture container_text("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/container.jpg", GL_TEXTURE0, GL_RGB);
     Texture face_text("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/awesomeface.png", GL_TEXTURE1, GL_RGBA);
     Texture3D tooth("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/tooth_103x94x161_uint8.raw", GL_TEXTURE2, glm::vec3(103, 94, 161));
+    Texture3D foot("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/foot_256x256x256_uint8.raw", GL_TEXTURE3, glm::vec3(256, 256, 256));
     myShader->setInt("texture1", 0);
     myShader->setInt("texture2", 1);
-    myShader->setInt("texture3", 2);
+    myShader->setInt("texture3", 3);
     myShader->setFloat("isovalue", 0.45f);
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::scale(model, glm::vec3(103, 94, 161));
@@ -165,7 +168,7 @@ void Renderer::renderScene(){
         model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
         int modelLoc = glGetUniformLocation(myShader->ID, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        myShader->setFloat("isovalue", sin((float)glfwGetTime()*0.5) * 0.5 + 0.5);
+        myShader->setFloat("isovalue", sin((float)glfwGetTime()*0.25) * 0.5 + 0.5);
 
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     
