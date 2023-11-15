@@ -73,3 +73,7 @@ Texture3D::Texture3D(char * texturePath, unsigned int glTextureUnit, glm::vec3 d
 
 	ID = texture;
 }
+
+void Texture3D::readHeaderFile(char* headerPath)
+{
+}

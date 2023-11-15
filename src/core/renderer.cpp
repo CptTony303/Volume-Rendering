@@ -71,25 +71,23 @@ void Renderer::init() {
 	};*/
 
 	float vertices[] = {
-		-0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f,  0.5f, -0.5f,
+		-0.5f,  0.5f, -0.5f,
 
-		-0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
 	};
 
 	unsigned int VBO;
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
 
 	unsigned int indices[] = {
 		0, 1, 2,
@@ -125,10 +123,11 @@ void Renderer::init() {
 	Texture container_text("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/container.jpg", GL_TEXTURE0, GL_RGB);
 	Texture face_text("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/awesomeface.png", GL_TEXTURE1, GL_RGBA);
 	Texture3D tooth("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/tooth_103x94x161_uint8.raw", GL_TEXTURE2, glm::vec3(103, 94, 161));
-	Texture3D foot("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/foot_256x256x256_uint8.raw", GL_TEXTURE3, glm::vec3(256, 256, 256));
+	Texture3D foot("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/foot_256x256x256_uint8.raw", GL_TEXTURE3, glm::vec3(256, 256, 256)); 
+	Texture3D head("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/vis_male_128x256x256_uint8.raw", GL_TEXTURE4, glm::vec3(128, 256, 256));
 	myShader->setInt("texture1", 0);
 	myShader->setInt("texture2", 1);
-	myShader->setInt("texture3", 3);
+	myShader->setInt("volumeTexture", 4);
 	myShader->setFloat("isovalue", 0.45f);
 	glm::mat4 model = glm::mat4(1.0f);
 	//model = glm::scale(model, glm::vec3(103, 94, 161));
@@ -154,7 +153,7 @@ void Renderer::init() {
 }
 
 void Renderer::renderScene() {
-	bool oszillate = false;
+	bool oszillate = true;
 	bool spin = true;
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

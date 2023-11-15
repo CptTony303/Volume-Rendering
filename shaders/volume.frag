@@ -4,7 +4,7 @@ out vec4 FragColor;
 
 in vec3 modelPos; //intersection with cube in model position
 
-uniform sampler3D texture3; //texture of the volume
+uniform sampler3D volumeTexture; //texture of the volume
 uniform float isovalue; //treshold for the density
 uniform mat4 model; //model matrix
 uniform mat4 view; //view matrix
@@ -26,7 +26,7 @@ vec4 rayMarch()
 //    scale.z = length(vec3(model[2]));
 
 
-    float stepSize = 0.01f; // Schrittweite
+    float stepSize = 0.001f; // Schrittweite
     float maxDistance = 1.8; // Maximaler Distanz für den Marsch = 1.8 weil wurzel 3 =diagonale vom 3dim Würfel 
 
     vec3 currentPosition = modelPos;
@@ -39,7 +39,7 @@ vec4 rayMarch()
         // Ray-Box-Intersection und Voxel-Wert-Abfrage hier implementieren
         vec3 texCoord = currentPosition+vec3(0.5f);
         vec3 reversedTexCoord = vec3(1.0 - texCoord.x, texCoord.z, texCoord.y);
-        float density = texture(texture3, texCoord).r;
+        float density = texture(volumeTexture, texCoord).r;
         if(density > isovalue){
             dist += distance(model * vec4(currentPosition, 1.f), model * vec4(modelPos,1.f));
             vec3 color = texCoord;
