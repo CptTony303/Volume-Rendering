@@ -16,7 +16,7 @@ Renderer::Renderer(GLFWwindow* window) {
 
 void Renderer::init() {
 
-	char* projectPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/";
+	char* projectPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/";
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -116,16 +116,16 @@ void Renderer::init() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
-	const char* vertPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/volume.vert";
-	const char* fragPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/volume.frag";
+	const char* vertPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/volume.vert";
+	const char* fragPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/volume.frag";
 
 	myShader = new Shader(vertPath, fragPath);
 	myShader->use();
 
-	Texture container_text("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/container.jpg", GL_TEXTURE0, GL_RGB);
-	Texture face_text("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/awesomeface.png", GL_TEXTURE1, GL_RGBA);
-	Texture3D tooth("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/tooth_103x94x161_uint8.raw", GL_TEXTURE2, glm::vec3(103, 94, 161));
-	Texture3D foot("X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/foot_256x256x256_uint8.raw", GL_TEXTURE3, glm::vec3(256, 256, 256));
+	Texture container_text("C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/Assets/container.jpg", GL_TEXTURE0, GL_RGB);
+	Texture face_text("C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/Assets/awesomeface.png", GL_TEXTURE1, GL_RGBA);
+	Texture3D tooth("C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/Assets/tooth_103x94x161_uint8.raw", GL_TEXTURE2, glm::vec3(103, 94, 161));
+	Texture3D foot("C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/Assets/foot_256x256x256_uint8.raw", GL_TEXTURE3, glm::vec3(256, 256, 256));
 	myShader->setInt("texture1", 0);
 	myShader->setInt("texture2", 1);
 	myShader->setInt("texture3", 3);
@@ -154,7 +154,7 @@ void Renderer::init() {
 }
 
 void Renderer::renderScene() {
-	bool oszillate = false;
+	bool oszillate = true;
 	bool spin = true;
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
