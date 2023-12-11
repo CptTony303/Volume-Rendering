@@ -51,7 +51,9 @@ vec4 rayMarch()
 
     return vec4(color, 0.f);
 }
-
+vec4 monteCarloIntegrationStep(){
+return vec4(1.f,1.f,1.f,1.f);
+}
 void main()
 {
     //vec3 reversedTexCoord = vec3(1.0 - TexCoord.x, 1.0 - TexCoord.y, TexCoord.z);

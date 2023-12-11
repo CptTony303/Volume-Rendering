@@ -44,12 +44,12 @@ Texture3D::Texture3D(char * texturePath, unsigned int glTextureUnit, glm::vec3 d
 			std::cout << static_cast<int>(value) << " ";
 		}*/
 		// Hier kannst du nun die Daten verwenden
-		std::vector <uint8_t> sortedData(fileSize);
+		std::vector <uint8_t> blownUpData(fileSize);
 		int index = 0;
 		for (int z = 0; z < depth; z++) {
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
-					sortedData[index++] = data[width - 1 - x + z * width + y * width* depth];
+					blownUpData[index++] = data[width - 1 - x + z * width + y * width* depth];
 					//sortedData[x + y * width + z * depth*width] = data[index++];
 				}
 			}
