@@ -1,15 +1,5 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.0)
 project(VolumeRenderer)
-
-## Find dependencies
-find_package(glfw3 REQUIRED)
-find_package(glad REQUIRED)
-find_package(glm REQUIRED)
-#find_package(freetype REQUIRED)
-find_package(imgui REQUIRED)
-
-# stb does not have a CMake build, but is header-only
-find_path(STB_INCLUDE_DIRS "stb_image.h") 
 
 include_directories(include)
 
@@ -43,18 +33,45 @@ foreach(FILE ${SRCS})
     source_group("${GROUP}" FILES ${FILE})
 endforeach()
 
-## Create main executable
-add_executable(main ${SRCS} ${INCLUDE})
-target_include_directories(main
-  PRIVATE 
-    ${STB_INCLUDE_DIRS}
-    "${CMAKE_CURRENT_LIST_DIR}/source"
+#installiere imgui
+set(IMGUI_SOURCES
+    lib/imgui/imgui.cpp
+    lib/imgui/imgui_demo.cpp
+    lib/imgui/imgui_draw.cpp
+    lib/imgui/imgui_widgets.cpp
+    lib/imgui/imgui_tables.cpp
 )
-target_link_libraries(
-  main
-  PRIVATE
-    glfw
-    glad::glad
-    glm::glm
-    imgui::imgui
+
+
+#installiere glad
+set(GLAD_SOURCES
+    lib/glad/src/glad.c
+    lib/stb_image/stb_image.cpp
 )
+
+add_executable(VolumeRenderer ${SRCS} ${INCLUDE} ${GLAD_SOURCES} ${IMGUI_SOURCES})
+
+target_include_directories(VolumeRenderer PRIVATE lib/imgui)
+target_include_directories(VolumeRenderer PRIVATE lib/glad/include)
+
+# Verknüpfe die Anwendung mit der GLFW-Bibliothek
+add_subdirectory(lib/glfw)
+target_link_libraries(VolumeRenderer PRIVATE glfw)
+
+
+# Installiere GLM
+add_subdirectory(lib/glm)
+target_link_libraries(VolumeRenderer PRIVATE glm)
+
+# Füge OpenGL als Abhängigkeit hinzu
+find_package(OpenGL REQUIRED)
+target_link_libraries(VolumeRenderer PRIVATE OpenGL::GL)
+
+#stb_image
+include_directories(lib/stb_image/include)
+
+#load shader
+file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})
+
+
+
