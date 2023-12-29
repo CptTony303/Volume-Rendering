@@ -39,12 +39,15 @@ set(IMGUI_SOURCES
     lib/imgui/imgui_widgets.cpp
     lib/imgui/imgui.cpp
     lib/imgui/imgui_tables.cpp
+    lib/imgui/backends/imgui_impl_glfw.cpp
+    lib/imgui/backends/imgui_impl_opengl3.cpp
 )
 
 add_executable(VolumeRenderer ${SRCS} ${INCLUDE} ${IMGUI_SOURCES} lib/glad/src/glad.c lib/stb_image/stb_image.cpp)
 
 # Include the IMGUI headers
 target_include_directories(VolumeRenderer PRIVATE lib/imgui)
+target_include_directories(VolumeRenderer PRIVATE lib/imgui/backends)
 # Add any required dependencies here
 target_link_libraries(VolumeRenderer PRIVATE ${CONAN_LIBS})  # Example for using Conan package manager
 

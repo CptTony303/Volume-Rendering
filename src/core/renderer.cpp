@@ -9,6 +9,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <core/texture3D.h>
+#include <imgui.h>
+
+//#include <imgui_widgets.cpp>
 
 Renderer::Renderer(GLFWwindow* window) {
 	_window = window;
@@ -129,7 +132,9 @@ void Renderer::init() {
 	myShader->setInt("texture1", 0);
 	myShader->setInt("texture2", 1);
 	myShader->setInt("texture3", 3);
-	myShader->setFloat("isovalue", 0.45f);
+	myShader->setFloat("isovalue", isovalue);
+	myShader->setInt("brightness", brightness);
+	myShader->setInt("methode", methode);
 	glm::mat4 model = glm::mat4(1.0f);
 	//model = glm::scale(model, glm::vec3(103, 94, 161));
 	glm::mat4 view = glm::mat4(1.0f);
@@ -154,14 +159,29 @@ void Renderer::init() {
 }
 
 void Renderer::renderScene() {
-	bool oszillate = true;
-	bool spin = true;
+	
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glBindVertexArray(VAO);
 	myShader->use();
+	
+	ImGui::Begin("Volume Renderer Settings");
+	ImGui::Text("Hello, world");
+	ImGui::Checkbox("oszillate iso", &oszillate);
+	ImGui::Checkbox("spin", &spin);
+	ImGui::SliderFloat("isovalue", &isovalue, 0.0f, 1.0f, "%.3f");
+	ImGui::SliderInt("brightness", &brightness, 1, 75, "%.5f");
+	ImGui::SliderFloat("stepSize", &stepSize, 0.001f, 0.02f, "%.5f");
+	ImGui::RadioButton("Ray Marching", &methode, 0); ImGui::SameLine();
+	ImGui::RadioButton("Monte Carlo Sampling", &methode, 1);
+	ImGui::RadioButton("Just rng demo", &methode, 2);
+	ImGui::End();
+
+	myShader->setInt("brightness", brightness);
+	myShader->setFloat("stepSize", stepSize);
+	myShader->setInt("methode", methode);
 
 	if (spin)
 	{
@@ -175,8 +195,9 @@ void Renderer::renderScene() {
 	}
 	if (oszillate)
 	{
-		myShader->setFloat("isovalue", sin((float)glfwGetTime() * 0.25) * 0.5 + 0.5);
+		isovalue = sin((float)glfwGetTime() * 0.25) * 0.5 + 0.5;
 	}
+	myShader->setFloat("isovalue", isovalue);
 
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 

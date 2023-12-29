@@ -16,4 +16,10 @@ private:
 	Shader* myShader;
 	glm::vec3 _cam_pos;
 	glm::vec3 _cam_rot;
+	bool oszillate = false;
+	bool spin = false;
+	float isovalue = 0.45f;
+	int brightness = 15;
+	float stepSize = 0.01;
+	int methode = 0;
 };
