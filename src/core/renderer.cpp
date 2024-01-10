@@ -19,6 +19,8 @@ Renderer::Renderer(GLFWwindow* window) {
 
 void Renderer::init() {
 
+	int samplesPerFrame = 25;
+
 	char* projectPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/";
 
 	glEnable(GL_BLEND);
@@ -119,6 +121,29 @@ void Renderer::init() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	// generate texture
+	unsigned int textureColorbuffer;
+	glGenTextures(1, &textureColorbuffer);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	
+	// generate depthbuffer
+	unsigned int depthbuffer;
+	glGenTextures(1, &depthbuffer);
+	glBindTexture(GL_TEXTURE_2D, depthbuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, 800, 600, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// attach it to currently bound framebuffer object
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthbuffer, 0);
+
 	const char* vertPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/volume.vert";
 	const char* fragPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/volume.frag";
 
@@ -135,6 +160,8 @@ void Renderer::init() {
 	myShader->setFloat("isovalue", isovalue);
 	myShader->setInt("brightness", brightness);
 	myShader->setInt("methode", methode);
+	myShader->setInt("samplesPerFrame", samplesPerFrame);
+	myShader->setFloat("randomizer", (float)glfwGetTime());
 	glm::mat4 model = glm::mat4(1.0f);
 	//model = glm::scale(model, glm::vec3(103, 94, 161));
 	glm::mat4 view = glm::mat4(1.0f);
@@ -156,10 +183,111 @@ void Renderer::init() {
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	int projectionLoc = glGetUniformLocation(myShader->ID, "projection");
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+
+	// Framebuffer VAO
+	glGenVertexArrays(1, &VAO_framebuffer);
+	glBindVertexArray(VAO_framebuffer);
+
+	float framebufferVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+
+	unsigned int VBO_framebuffer;
+	glGenBuffers(1, &VBO_framebuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_framebuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(framebufferVertices), &framebufferVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	glGenFramebuffers(1, &fbo_switch);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_switch);
+	// generate texture
+	unsigned int textureSwitch;
+	glGenTextures(1, &textureSwitch);
+	glBindTexture(GL_TEXTURE_2D, textureSwitch);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	// attach it to currently bound framebuffer object
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureSwitch, 0);
+
+	const char* vertPathFramebuffer = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/framebuffer.vert";
+	const char* fragPathFramebuffer = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/framebuffer.frag";
+
+	framebufferShader = new Shader(vertPathFramebuffer, fragPathFramebuffer);
+	framebufferShader->use();
+
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+
+	framebufferShader->setInt("screenTexture", 0);
+	//framebufferShader->setInt("screenCopy", 1);
+	framebufferShader->setInt("runs", 0);
+	framebufferShader->setInt("samplesPerRun", samplesPerFrame);
+
+
+	glGenVertexArrays(1, &VAO_copy);
+	glBindVertexArray(VAO_copy);
+
+	unsigned int VBO_copy;
+	glGenBuffers(1, &VBO_copy);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_copy);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(framebufferVertices), &framebufferVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	glGenFramebuffers(1, &fbo_copy);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_copy);
+
+	glActiveTexture(GL_TEXTURE1);
+	// generate texture
+	unsigned int textureCopy;
+	glGenTextures(1, &textureCopy);
+	glBindTexture(GL_TEXTURE_2D, textureCopy);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// attach it to currently bound framebuffer object
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureCopy, 0);
+
+	const char* vertPathcopy = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/copy.vert";
+	const char* fragPathcopy = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/copy.frag";
+
+	copyShader = new Shader(vertPathcopy, fragPathcopy);
+	copyShader->use();
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, textureSwitch);
+
+	copyShader->setInt("screenTexture", 2);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, textureCopy);
+	framebufferShader->use();
+	framebufferShader->setInt("screenCopy", 1);
 }
 
 void Renderer::renderScene() {
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	
+	//glDeleteFramebuffers(1, &fbo);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -172,11 +300,12 @@ void Renderer::renderScene() {
 	ImGui::Checkbox("oszillate iso", &oszillate);
 	ImGui::Checkbox("spin", &spin);
 	ImGui::SliderFloat("isovalue", &isovalue, 0.0f, 1.0f, "%.3f");
-	ImGui::SliderInt("brightness", &brightness, 1, 75, "%.5f");
+	ImGui::SliderInt("brightness", &brightness, 1, 75);
 	ImGui::SliderFloat("stepSize", &stepSize, 0.001f, 0.02f, "%.5f");
 	ImGui::RadioButton("Ray Marching", &methode, 0); ImGui::SameLine();
 	ImGui::RadioButton("Monte Carlo Sampling", &methode, 1);
 	ImGui::RadioButton("Just rng demo", &methode, 2);
+	ImGui::RadioButton("colored cube", &methode, -1);
 	ImGui::End();
 
 	myShader->setInt("brightness", brightness);
@@ -198,33 +327,42 @@ void Renderer::renderScene() {
 		isovalue = sin((float)glfwGetTime() * 0.25) * 0.5 + 0.5;
 	}
 	myShader->setFloat("isovalue", isovalue);
+	myShader->setFloat("randomizer", (float)glfwGetTime());
 
+	glEnable(GL_DEPTH_TEST);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-	//glm::vec3 cubePositions[] = {
-	//glm::vec3(0.0f,  0.0f,  0.0f),
-	//glm::vec3(2.0f,  5.0f, -15.0f),
-	//glm::vec3(-1.5f, -2.2f, -2.5f),
-	//glm::vec3(-3.8f, -2.0f, -12.3f),
-	//glm::vec3(2.4f, -0.4f, -3.5f),
-	//glm::vec3(-1.7f,  3.0f, -7.5f),
-	//glm::vec3(1.3f, -2.0f, -2.5f),
-	//glm::vec3(1.5f,  2.0f, -2.5f),
-	//glm::vec3(1.5f,  0.2f, -1.5f),
-	//glm::vec3(-1.3f,  1.0f, -1.5f)
-	//};
 
-	//for (unsigned int i = 0; i < 10; i++)
-	//{
-	//    glm::mat4 model = glm::mat4(1.0f);
-	//    model = glm::translate(model, cubePositions[i]);
-	//    float angle = 20.0f * i;
-	//    if (angle == 0.0f) {
-	//        angle = 10.0f;
-	//    }
-	//    model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-	//    int modelLoc = glGetUniformLocation(myShader->ID, "model");
-	//    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-	//    //glDrawArrays(GL_TRIANGLES, 0, 36);
-	//}
+	glDisable(GL_DEPTH_TEST);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_switch);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
+	}
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	framebufferShader->use();
+	glBindVertexArray(VAO_framebuffer);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	
+	runs++;
+	if (methode != 1) {
+		runs = 0;
+	}
+	framebufferShader->setInt("runs", runs);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_copy);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	copyShader->use();
+	glBindVertexArray(VAO_copy);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindVertexArray(VAO_copy);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	
 }

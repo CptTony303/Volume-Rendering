@@ -12,14 +12,15 @@ public:
 	void init();
 private:
 	GLFWwindow* _window;
-	unsigned int VAO;
-	Shader* myShader;
+	unsigned int VAO, VAO_framebuffer, fbo, fbo_switch, fbo_copy, VAO_copy;
+	Shader* myShader, * framebufferShader, * copyShader;
 	glm::vec3 _cam_pos;
 	glm::vec3 _cam_rot;
 	bool oszillate = false;
 	bool spin = false;
-	float isovalue = 0.45f;
-	int brightness = 15;
+	float isovalue = 0.f;
+	int brightness = 1;
 	float stepSize = 0.01;
 	int methode = 0;
+	int runs = 0;
 };
