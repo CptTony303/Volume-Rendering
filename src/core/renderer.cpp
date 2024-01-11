@@ -11,14 +11,20 @@
 #include <core/texture3D.h>
 #include <imgui.h>
 
+#include <core/Scenes/volumeScene.h>
+
 //#include <imgui_widgets.cpp>
 
 Renderer::Renderer(GLFWwindow* window) {
+	scene = VolumeScene();
 	_window = window;
 }
 
 void Renderer::init() {
-
+	scene.initScene();
+	//unusedInit();
+}
+void Renderer::unusedInit(){
 	int samplesPerFrame = 25;
 
 	char* projectPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/";
@@ -29,7 +35,7 @@ void Renderer::init() {
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
 
 	/*float vertices[] = {
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -223,7 +229,7 @@ void Renderer::init() {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureSwitch, 0);
 
 	const char* vertPathFramebuffer = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/framebuffer.vert";
-	const char* fragPathFramebuffer = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/framebuffer.frag";
+	const char* fragPathFramebuffer = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/accumulation.frag";
 
 	framebufferShader = new Shader(vertPathFramebuffer, fragPathFramebuffer);
 	framebufferShader->use();
@@ -284,7 +290,10 @@ void Renderer::init() {
 }
 
 void Renderer::renderScene() {
-
+	scene.renderScene();
+	//unusedRender();
+}
+void Renderer::unusedRender(){
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	
 	//glDeleteFramebuffers(1, &fbo);

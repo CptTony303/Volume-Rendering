@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <core/shader.h>
 #include <glm/glm.hpp>
+#include <core/Scenes/volumeScene.h>
 
 class Renderer
 {
@@ -9,8 +10,11 @@ public:
 	Renderer(GLFWwindow* window);
 	//void loadScene(Scene* scene);
 	void renderScene();
+	void unusedRender();
 	void init();
+	void unusedInit();
 private:
+	VolumeScene scene;
 	GLFWwindow* _window;
 	unsigned int VAO, VAO_framebuffer, fbo, fbo_switch, fbo_copy, VAO_copy;
 	Shader* myShader, * framebufferShader, * copyShader;

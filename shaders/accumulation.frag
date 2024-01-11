@@ -14,9 +14,9 @@ void main()
     if(runs <= 0){
         FragColor = texture(screenTexture, TexCoords);
     }else{
-//        FragColor = texture(screenTexture, TexCoords) + texture(screenCopy, TexCoords)*runs;
-//        FragColor /= runs+1;
-        FragColor = texture(screenTexture, TexCoords) + texture(screenCopy, TexCoords)*9;
-        FragColor /= 10;
+        FragColor = texture(screenTexture, TexCoords) + texture(screenCopy, TexCoords)*runs;
+        FragColor /= runs+1;
+//        FragColor = texture(screenTexture, TexCoords) + texture(screenCopy, TexCoords)*9;
+//        FragColor /= 10;
     }
 }

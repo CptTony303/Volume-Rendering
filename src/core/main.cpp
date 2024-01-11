@@ -27,7 +27,6 @@ int main() {
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	GLFWwindow* window = glfwCreateWindow(800, 600, "Volume Renderer", NULL, NULL);
-	Renderer* renderer = new Renderer(window);
 	int width, height;
 	
 
@@ -46,7 +45,8 @@ int main() {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
-	renderer->init();
+	Renderer renderer = Renderer(window);
+	renderer.init();
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -68,7 +68,7 @@ int main() {
 		ImGui::NewFrame();
 		//ImGui::ShowDemoWindow(); // Show demo window! :)
 
-		renderer->renderScene();
+		renderer.renderScene();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
