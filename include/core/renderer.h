@@ -1,3 +1,7 @@
+#ifndef RENDERER_H
+#define RENDERER_H
+
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <core/shader.h>
@@ -7,15 +11,15 @@
 class Renderer
 {
 public:
-	Renderer(GLFWwindow* window);
+	Renderer();
 	//void loadScene(Scene* scene);
 	void renderScene();
+	void processInput(GLFWwindow* window, float delta);
 	void unusedRender();
 	void init();
 	void unusedInit();
 private:
 	VolumeScene scene;
-	GLFWwindow* _window;
 	unsigned int VAO, VAO_framebuffer, fbo, fbo_switch, fbo_copy, VAO_copy;
 	Shader* myShader, * framebufferShader, * copyShader;
 	glm::vec3 _cam_pos;
@@ -28,3 +32,5 @@ private:
 	int methode = 0;
 	int runs = 0;
 };
+
+#endif // !RENDERER_H

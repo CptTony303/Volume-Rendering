@@ -5,12 +5,15 @@
 #include <core/shader.h>
 #include <core/framebuffer.h>
 #include <glm/glm.hpp>
+#include <GLFW/glfw3.h>
+#include <core/camera.h>
 
 class VolumeScene{
 public:
 	VolumeScene();
 	void initScene();
 	void renderScene();
+	void processInput(GLFWwindow* window, float delta);
 private:
 	void initTransformationMatrices();
 	void initVolumeVAO();
@@ -28,6 +31,7 @@ private:
 
 	//private member variables
 	glm::mat4 model, view, projection;
+	Camera camera;
 	unsigned int VAO_VOLUME, VAO_FRAME; //VAOs
 	Shader monteCarloShader, rayMarchShader, accumulationShader, copyShader; //Shaders
 	Framebuffer FBO_VOLUME, FBO_ACCUMULATION, FBO_LAST_FRAME; //Framebuffers
@@ -37,7 +41,7 @@ private:
 	//GUI variables:
 	int gui_methode = 0;
 	float gui_stepSize = 0.01f;
-	int gui_samplesPerFrame = 25;
+	int gui_samplesPerFrame = 5;
 };
 
 #endif

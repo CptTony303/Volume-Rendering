@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
+#include <core/camera.h>
 
 
 VolumeScene::VolumeScene()
@@ -28,22 +30,23 @@ void VolumeScene::renderScene()
 	renderVolume();
 }
 
+void VolumeScene::processInput(GLFWwindow* window, float delta)
+{
+	if (camera.processInput(window, delta))
+		accumulatedFrames = 0;
+}
+
 
 void VolumeScene::initTransformationMatrices()
 {
 	model = glm::mat4(1.0f);
 	//model = glm::scale(model, glm::vec3(103, 94, 161));
-	view = glm::mat4(1.0f);
-	// note that we're translating the scene in the reverse direction of where we want to move
-	glm::vec3 cam_pos = glm::vec3(0.0f, 0.0f, -3.0f);
-	glm::vec3 cam_rot = glm::vec3(-0.0f, 0.0f, 0.0f);
-	//noch nicht richtig, aber ok für testzwecke
-	view = glm::rotate(view, cam_rot.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	view = glm::rotate(view, cam_rot.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	view = glm::rotate(view, cam_rot.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	view = glm::translate(view, cam_pos);
+	glm::vec3 cam_pos = glm::vec3(-50.0f, 0.0f, 0.0f);
+	glm::vec3 cam_view_dir = glm::vec3(1.f, 0.f, 0.f);
+	glm::vec3 cam_up_dir = glm::vec3(0.f, 1.f, 0.f);
 
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	camera = Camera(cam_pos, cam_view_dir, cam_up_dir,
+		45.f, 800.f/600.f, 0.1f, 1000.f);
 }
 
 void VolumeScene::initVolumeVAO()
@@ -163,13 +166,6 @@ void VolumeScene::initVolumeShaders()
 
 	monteCarloShader.setInt("volume", 3);
 
-	int modelLoc = glGetUniformLocation(monteCarloShader.ID, "model");
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-	int viewLoc = glGetUniformLocation(monteCarloShader.ID, "view");
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-	int projectionLoc = glGetUniformLocation(monteCarloShader.ID, "projection");
-	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
 	const char* vertPathRayMarch = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/volume.vert";
 	const char* fragPathRayMarch = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/ray_marching.frag";
 
@@ -177,13 +173,6 @@ void VolumeScene::initVolumeShaders()
 	rayMarchShader.use();
 
 	rayMarchShader.setInt("volume", 3);
-
-	int modelLoc2 = glGetUniformLocation(rayMarchShader.ID, "model");
-	glUniformMatrix4fv(modelLoc2, 1, GL_FALSE, glm::value_ptr(model));
-	int viewLoc2 = glGetUniformLocation(rayMarchShader.ID, "view");
-	glUniformMatrix4fv(viewLoc2, 1, GL_FALSE, glm::value_ptr(view));
-	int projectionLoc2 = glGetUniformLocation(rayMarchShader.ID, "projection");
-	glUniformMatrix4fv(projectionLoc2, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
 void VolumeScene::initAccumulationShader()
@@ -287,15 +276,23 @@ void VolumeScene::accumulateFrames()
 
 	accumulatedFrames++;
 }
-
 void VolumeScene::updateShaderValues()
 {
 	rayMarchShader.use();
+	rayMarchShader.setMat4("model", model);
+	rayMarchShader.setMat4("view", camera.getViewMatrix());
+	rayMarchShader.setMat4("projection", camera.getProjectionMatrix());
 	rayMarchShader.setFloat("stepSize", gui_stepSize);
+
 	monteCarloShader.use();
+	monteCarloShader.setMat4("model", model);
+	monteCarloShader.setMat4("view", camera.getViewMatrix());
+	monteCarloShader.setMat4("projection", camera.getProjectionMatrix());
 	monteCarloShader.setInt("samplesPerFrame", gui_samplesPerFrame);
 	monteCarloShader.setFloat("randomizer", (float)glfwGetTime());
+
 	accumulationShader.use();
 	accumulationShader.setInt("runs", accumulatedFrames);
 	accumulationShader.setInt("samplesPerRun", gui_samplesPerFrame);
+	
 }

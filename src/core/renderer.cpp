@@ -15,10 +15,11 @@
 
 //#include <imgui_widgets.cpp>
 
-Renderer::Renderer(GLFWwindow* window) {
+Renderer::Renderer()
+{
 	scene = VolumeScene();
-	_window = window;
 }
+
 
 void Renderer::init() {
 	scene.initScene();
@@ -292,6 +293,10 @@ void Renderer::unusedInit(){
 void Renderer::renderScene() {
 	scene.renderScene();
 	//unusedRender();
+}
+void Renderer::processInput(GLFWwindow* window, float delta)
+{
+	scene.processInput(window, delta);
 }
 void Renderer::unusedRender(){
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
