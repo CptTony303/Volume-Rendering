@@ -14,6 +14,8 @@ public:
 	void initScene();
 	void renderScene();
 	void processInput(GLFWwindow* window, float delta);
+	//callback functions
+	void scroll_callback(double xoffset, double yoffset);
 private:
 	void initTransformationMatrices();
 	void initVolumeVAO();

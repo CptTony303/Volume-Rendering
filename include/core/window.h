@@ -9,24 +9,26 @@
 
 class Window {
 public:
-	enum CallbackType {KEY, MOUSE_BUTTON, SCROLL, FRAMEBUFFER_SIZE};
 	static Window* getInstance();
-	void startRenderLoop();
-	void initWindow();
-	void registerCallback(int type, void* func);
 
-	GLFWwindow* _glfw_window;
 	// deleting copy constructor
 	//Window(const Window& obj)
 	//	= delete;
 
 private:
 	Window();
+	void startRenderLoop();
+	void initWindow();
+	enum CallbackType { KEY, MOUSE_BUTTON, SCROLL, FRAMEBUFFER_SIZE };
+	void registerCallback(GLFWwindow* window, int type, void* func);
 	void processInput(GLFWwindow* window);
 
 	static Window* Window::window;
 	Renderer* renderer;
-
 };
+
+//callback functions
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 #endif // !WINDOW_H

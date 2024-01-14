@@ -36,17 +36,22 @@ void VolumeScene::processInput(GLFWwindow* window, float delta)
 		accumulatedFrames = 0;
 }
 
+void VolumeScene::scroll_callback(double xoffset, double yoffset)
+{
+	camera.scroll_callback(xoffset, yoffset);
+}
+
 
 void VolumeScene::initTransformationMatrices()
 {
 	model = glm::mat4(1.0f);
 	//model = glm::scale(model, glm::vec3(103, 94, 161));
-	glm::vec3 cam_pos = glm::vec3(-50.0f, 0.0f, 0.0f);
+	glm::vec3 cam_pos = glm::vec3(-3.0f, 0.0f, 0.0f);
 	glm::vec3 cam_view_dir = glm::vec3(1.f, 0.f, 0.f);
 	glm::vec3 cam_up_dir = glm::vec3(0.f, 1.f, 0.f);
 
 	camera = Camera(cam_pos, cam_view_dir, cam_up_dir,
-		45.f, 800.f/600.f, 0.1f, 1000.f);
+		45.f, 800.f/600.f, 0.1f, 100.f);
 }
 
 void VolumeScene::initVolumeVAO()

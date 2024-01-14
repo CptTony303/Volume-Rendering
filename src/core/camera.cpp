@@ -7,14 +7,11 @@
 #define GLFW_INCLUDE_NONE
 #include <core/window.h>
 
-//callbacks for glfw window
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-	std::cout << "Holy shit, it works!!" << std::endl;
-}
 
 Camera::Camera()
 {
 }
+float g_view_angle = 45.f;
 
 Camera::Camera(glm::vec3 position, glm::vec3 view_direction, glm::vec3 up_direction,
 	float view_angle, float image_ratio, float min_distance, float max_distance)
@@ -22,14 +19,21 @@ Camera::Camera(glm::vec3 position, glm::vec3 view_direction, glm::vec3 up_direct
 	_position = position;
 	_view_direction = glm::normalize(view_direction);
 	_up_direction = glm::normalize(up_direction);
-	_view_angle = image_ratio;
+	_view_angle = view_angle;
+	g_view_angle = _view_angle;
+	_image_ratio = image_ratio;
+	_min_distance = min_distance;
+	_max_distance = max_distance;
+
+	//safe init values for reset
 	_init_view_direction = _view_direction;
 	_init_position = _position;
 	_init_view_angle = _view_angle;
+	_init_min_distance = _min_distance;
+	_init_max_distance = _max_distance;
 
 	update_view();
-	//Window::getInstance()->registerCallback(Window::SCROLL, scroll_callback);
-	projection = glm::perspective(glm::radians(_view_angle), image_ratio, min_distance, max_distance);
+	update_projection();
 }
 
 glm::mat4 Camera::getViewMatrix()
@@ -48,11 +52,11 @@ bool Camera::processInput(GLFWwindow* window, float delta)
 
 	//position movement
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		_position += delta * _speed * _view_direction * 4.f;
+		_position += delta * _speed * _view_direction * _z_dir_speedup;
 		modified = true;
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		_position -= delta * _speed * _view_direction * 4.f;
+		_position -= delta * _speed * _view_direction * _z_dir_speedup;
 		modified = true;
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
@@ -107,14 +111,31 @@ bool Camera::processInput(GLFWwindow* window, float delta)
 	_last_mouse_position_y = current_mouse_position_y;
 
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-		reset_view();
+		reset_camera();
 		modified = true;
 	}
 
 	if (modified) {
 		update_view();
 	}
+
+	//change zoom
+	if (g_view_angle != _view_angle) {
+		_view_angle = g_view_angle;
+		update_projection();
+		modified = true;
+	}
+
 	return modified;
+}
+int test = 1;
+void Camera::scroll_callback(double xoffset, double yoffset)
+{
+	g_view_angle -= (float)yoffset;
+	//if (_view_angle < 1.0f)
+	//	_view_angle = 1.0f;
+	//if (_view_angle > 45.0f)
+	//	_view_angle = 45.0f;
 }
 
 void Camera::update_view()
@@ -123,8 +144,21 @@ void Camera::update_view()
 	view = glm::lookAt(_position, _position + _view_direction, _up_direction);
 }
 
-void Camera::reset_view()
+void Camera::update_projection()
 {
+	projection = glm::perspective(glm::radians(_view_angle), _image_ratio, _min_distance, _max_distance);
+}
+
+void Camera::reset_camera()
+{
+	//view
 	_view_direction = _init_view_direction;
 	_position = _init_position;
+	update_view();
+	//projection
+	_view_angle = _init_view_angle;
+	g_view_angle = _view_angle;
+	_min_distance = _init_min_distance;
+	_max_distance = _init_max_distance;
+	update_projection();
 }

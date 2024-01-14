@@ -11,10 +11,15 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-
+	glViewport(0, 0, width, height);
+}
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+	Renderer* renderer = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
+	renderer->scroll_callback(xoffset, yoffset);
 }
 Window* Window::window = NULL;
 Window::Window() {
+	startRenderLoop();
 }
 
 Window* Window::getInstance()
@@ -31,9 +36,9 @@ Window* Window::getInstance()
 	}
 }
 
-void Window::registerCallback(int type, void* func)
+void Window::registerCallback(GLFWwindow* glfw_window, int type, void* func)
 {
-	GLFWwindow* glfw_window = reinterpret_cast<GLFWwindow*>(glfwGetWindowUserPointer(_glfw_window));
+	glfwSetWindowUserPointer(glfw_window, renderer);
 	switch (type)
 	{
 	case KEY:
@@ -74,7 +79,9 @@ void Window::startRenderLoop() {
 	glfwMakeContextCurrent(glfw_window);
 
 	//set callback functions
-	glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
+	registerCallback(glfw_window, FRAMEBUFFER_SIZE, framebuffer_size_callback);
+	registerCallback(glfw_window, SCROLL, scroll_callback);
+	//glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
 	//glfwSetKeyCallback(glfw_window, key_callback);
 	//glfwSetMouseButtonCallback(glfw_window, mouse_button_callback);
 	//glfwSetScrollCallback(glfw_window, scroll_callback);
@@ -139,7 +146,6 @@ void Window::initWindow()
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	GLFWwindow* glfw_window = glfwCreateWindow(800, 600, "Volume Renderer", NULL, NULL);
-	glfwSetWindowUserPointer(glfw_window, _glfw_window);
 	int width, height;
 
 

@@ -17,20 +17,10 @@ public:
 	void processInput(GLFWwindow* window, float delta);
 	void unusedRender();
 	void init();
-	void unusedInit();
+	//callback functions
+	void scroll_callback(double xoffset, double yoffset);
 private:
 	VolumeScene scene;
-	unsigned int VAO, VAO_framebuffer, fbo, fbo_switch, fbo_copy, VAO_copy;
-	Shader* myShader, * framebufferShader, * copyShader;
-	glm::vec3 _cam_pos;
-	glm::vec3 _cam_rot;
-	bool oszillate = false;
-	bool spin = false;
-	float isovalue = 0.f;
-	int brightness = 1;
-	float stepSize = 0.01;
-	int methode = 0;
-	int runs = 0;
 };
 
 #endif // !RENDERER_H

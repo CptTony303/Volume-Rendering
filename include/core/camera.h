@@ -14,15 +14,18 @@ public:
 	glm::mat4 getViewMatrix();
 	glm::mat4 getProjectionMatrix();
 	bool processInput(GLFWwindow* window, float delta);
+	//callback functions
+	void scroll_callback(double xoffset, double yoffset);
 
 private:
 	void update_view();
-	void reset_view();
-	float _speed = 5.f, _sensitivity = 1.f;
+	void update_projection();
+	void reset_camera();
+	float  _view_angle, _image_ratio, _min_distance, _max_distance, _init_view_angle, _init_min_distance, _init_max_distance;
+	float _speed = 3.f, _sensitivity = 2.f, _z_dir_speedup = 1.f;
 
 	glm::mat4 view, projection;
 	glm::vec3 _position, _view_direction, _up_direction, _init_position, _init_view_direction;
-	float _view_angle, _init_view_angle;
 	double _last_mouse_position_x, _last_mouse_position_y;
 };
 

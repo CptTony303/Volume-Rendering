@@ -30,7 +30,7 @@
 int main() {
 	Window* window = Window::getInstance();
 	//window->initWindow();
-	window->startRenderLoop();
+	//window->startRenderLoop();
 	return 0;
 }
 //int old_main() {
