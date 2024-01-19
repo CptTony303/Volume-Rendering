@@ -11,7 +11,8 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	glViewport(0, 0, width, height);
+	Renderer* renderer = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
+	renderer->framebuffer_size_callback(width, height);
 }
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 	Renderer* renderer = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
@@ -67,9 +68,7 @@ void Window::startRenderLoop() {
 	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	GLFWwindow* glfw_window = glfwCreateWindow(800, 600, "Volume Renderer", NULL, NULL);
-	int width, height;
-
+	GLFWwindow* glfw_window = glfwCreateWindow(1200, 700, "Volume Renderer", NULL, NULL);
 
 	if (!glfw_window) {
 		// Fehlerbehandlung: Das Fenster konnte nicht erstellt werden
@@ -86,7 +85,6 @@ void Window::startRenderLoop() {
 	//glfwSetMouseButtonCallback(glfw_window, mouse_button_callback);
 	//glfwSetScrollCallback(glfw_window, scroll_callback);
 
-	glfwGetFramebufferSize(glfw_window, &width, &height);
 	glfwSwapInterval(1);
 	//glViewport(0, 0, width, height);
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -94,8 +92,11 @@ void Window::startRenderLoop() {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return;
 	}
+	int width, height;
+	glfwGetFramebufferSize(glfw_window, &width, &height);
+	glViewport(0, 0, width, height);
 
-	renderer = &Renderer();
+	renderer = &Renderer(width, height);
 	renderer->init();
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();

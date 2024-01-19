@@ -8,7 +8,12 @@ uniform mat4 model; //model matrix
 uniform mat4 view; //view matrix
 
 uniform sampler3D volume; //texture of the volume
+uniform int numberOfColorPoints;
+uniform vec2 transfer_function_color[100];
+uniform int numberOfDensityPoints;
+uniform vec2 transfer_function_density[100];
 
+uniform float brightness;
 uniform int samplesPerFrame;
 uniform float randomizer;
 
@@ -45,7 +50,44 @@ void init_seed(vec3 init_seed){
 }
 /*END simple substitution for rng*/
 
-vec3 transferFunction(float value){
+//transfer functions
+float transferFunctionDensity(float value){
+    for(int i = 0; i < numberOfDensityPoints; i++){
+        if(value<=transfer_function_density[i].x){
+            //check for out of bounds
+            if(i == 0){
+                return transfer_function_density[i].y;
+            }else{
+            //linear interpolation
+                float y0 = transfer_function_density[i-1].y;
+                float y1 = transfer_function_density[i].y;
+                float x0 = transfer_function_density[i-1].x;
+                float x1 = transfer_function_density[i].x;
+                float x = value;
+
+                return (y0*(x1-x)+y1*(x-x0))/(x1-x0);
+            }
+        }
+    }
+    return 0; //transfer_function_density[0];
+}
+vec3 transferFunctionColor(float value){
+    for(int i = 0; i < numberOfColorPoints; i++){
+        if(value<=transfer_function_color[i].x){
+            //check for out of bounds
+            if(i == 0){
+                value = transfer_function_color[i].y;
+            }else{
+            //linear interpolation
+                float y0 = transfer_function_color[i-1].y;
+                float y1 = transfer_function_color[i].y;
+                float x0 = transfer_function_color[i-1].x;
+                float x1 = transfer_function_color[i].x;
+                float x = value;
+                value = (y0*(x1-x)+y1*(x-x0))/(x1-x0);
+            }
+        }
+    }
     value -= 0.5;
     float red = value > 0 ? value * 2 : 0;
     float green = 1.f - 2* abs(value);
@@ -59,7 +101,6 @@ vec4 deltaTracking(vec3 w){
     int counter = 0;
     while(true){
         if(counter >= 500){
-//            return vec4(0.2f, 0.3f, 0.3f, 1.0f);
             return vec4(1.f, 0.f, 0.f, 1.0f);
         }
         counter++;
@@ -70,13 +111,14 @@ vec4 deltaTracking(vec3 w){
         x += t * w;
 
         vec3 texCoord = x+vec3(0.5f);
-        float density = texture(volume, texCoord).r*mu;
+        float volumeData = texture(volume, texCoord).r;
+        float density = transferFunctionDensity(volumeData)*brightness;
 
         if(rng2 < density/mu){
-            return vec4(transferFunction(density/mu),1.f);
+            return vec4(transferFunctionColor(volumeData),1.f);
         }
         if(distance(x,modelPos) > 1.8){ //out of volume (1.8 ist längste diagonale eines Würfels)
-            return vec4(0.2f, 0.3f, 0.3f, 1.0f);
+            return vec4(0.0f, 0.0f, 0.0f, 1.0f);
         }
     }
 }

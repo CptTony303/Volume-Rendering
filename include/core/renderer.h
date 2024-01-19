@@ -11,14 +11,15 @@
 class Renderer
 {
 public:
-	Renderer();
+	Renderer() {};
+	Renderer(int width, int height);
 	//void loadScene(Scene* scene);
 	void renderScene();
 	void processInput(GLFWwindow* window, float delta);
-	void unusedRender();
 	void init();
 	//callback functions
 	void scroll_callback(double xoffset, double yoffset);
+	void framebuffer_size_callback(int width, int height);
 private:
 	VolumeScene scene;
 };

@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <iostream>
 
-Framebuffer::Framebuffer() {
+Framebuffer::Framebuffer(int width, int height) {
 	unsigned int local_id;
 	glGenFramebuffers(1, &local_id);
 	glBindFramebuffer(GL_FRAMEBUFFER, local_id);
@@ -16,7 +16,7 @@ Framebuffer::Framebuffer() {
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	//get actual screen size
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -25,7 +25,7 @@ Framebuffer::Framebuffer() {
 	glGenTextures(1, &depthbuffer);
 	glBindTexture(GL_TEXTURE_2D, depthbuffer);
 	//get actual screen size
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, 800, 600, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
 	//rebind texture
 	glBindTexture(GL_TEXTURE_2D, 0);
 

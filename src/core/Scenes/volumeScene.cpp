@@ -9,17 +9,20 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <core/camera.h>
+#include <core/GUI/volumeGUI.h>
 
+int g_width = 1500, g_height = 1200;
 
-VolumeScene::VolumeScene()
+VolumeScene::VolumeScene(int width, int height)
 {
+	g_width = width;
+	g_height = height;
 }
-
 void VolumeScene::initScene() {
-	//Scene::initScene();
 	initTransformationMatrices();
 	initVAOs();
 	initFBOs();
+	gui = VolumeGUI();
 	initShaders();
 }
 
@@ -40,6 +43,11 @@ void VolumeScene::scroll_callback(double xoffset, double yoffset)
 {
 	camera.scroll_callback(xoffset, yoffset);
 }
+void VolumeScene::framebuffer_size_callback(int width, int height)
+{
+	g_width = width;
+	g_height = height;
+}
 
 
 void VolumeScene::initTransformationMatrices()
@@ -51,7 +59,7 @@ void VolumeScene::initTransformationMatrices()
 	glm::vec3 cam_up_dir = glm::vec3(0.f, 1.f, 0.f);
 
 	camera = Camera(cam_pos, cam_view_dir, cam_up_dir,
-		45.f, 800.f/600.f, 0.1f, 100.f);
+		45.f, float(g_width) / float(g_height), 0.1f, 100.f);
 }
 
 void VolumeScene::initVolumeVAO()
@@ -145,9 +153,9 @@ void VolumeScene::initVAOs()
 
 void VolumeScene::initFBOs()
 {
-	FBO_VOLUME = Framebuffer();
-	FBO_ACCUMULATION = Framebuffer();
-	FBO_LAST_FRAME = Framebuffer();
+	FBO_VOLUME = Framebuffer(g_width, g_height);
+	FBO_ACCUMULATION = Framebuffer(g_width, g_height);
+	FBO_LAST_FRAME = Framebuffer(g_width, g_height);
 }
 
 void VolumeScene::initShaders()
@@ -214,26 +222,30 @@ void VolumeScene::initCopyShader()
 
 void VolumeScene::renderGUI()
 {
-	ImGui::Begin("Volume Renderer Settings");
-	ImGui::Text("This is a simple Volume renderer coded by Anton Hartmann.");
-	ImGui::Text("Select your render methode:");
-	ImGui::RadioButton("Ray Marching", &gui_methode, 0); ImGui::SameLine();
-	ImGui::RadioButton("Monte Carlo Sampling", &gui_methode, 1);
-	ImGui::Text("Just for debug purposes:");
-	ImGui::RadioButton("Just rng demo", &gui_methode, 2); ImGui::SameLine();
-	ImGui::RadioButton("colored cube", &gui_methode, -1);
-	if (gui_methode == 0) {
-		ImGui::Text("Set the step size for the ray march:");
-		ImGui::SliderFloat("stepSize", &gui_stepSize, 0.001f, 0.02f, "%.5f");
+	gui.renderGUI();
+	if (gui.reset_accumulation_frames) {
+		accumulatedFrames = 0;
+		gui.reset_accumulation_frames = false;
+		std::cout << "\nColors:\n";
+		for each (glm::vec2 p in gui.trans_func_points_color)
+		{
+			std::cout << "(" << p.x << "," << p.y << ") , ";
+		}
+		std::cout << std::endl;
+		std::cout << "Density:\n";
+		for each (glm::vec2 p in gui.trans_func_points_density)
+		{
+			std::cout << "(" << p.x << "," << p.y << ") , ";
+		}
+		std::cout << "\n" << std::endl;
 	}
-	ImGui::End();
 }
 
 void VolumeScene::renderVolume()
 {
 	glBindVertexArray(VAO_VOLUME);
 
-	switch(gui_methode) { 
+	switch (gui.methode) {
 	case 1://monte carlo
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO_VOLUME.getID()); //draw into framebuffer
 		monteCarloShader.use();
@@ -243,13 +255,13 @@ void VolumeScene::renderVolume()
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); //else draw on screen
 		rayMarchShader.use();
 	}
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f); //set clear color
+	glClearColor(0.f, 0.f, 0.f, 1.0f); //set clear color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
 	glEnable(GL_DEPTH_TEST);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-	if (gui_methode == 1) { //if monte carlo
+	if (gui.methode == 1) { //if monte carlo
 		VolumeScene::accumulateFrames(); //accumulate frames
 	}
 }
@@ -283,21 +295,43 @@ void VolumeScene::accumulateFrames()
 }
 void VolumeScene::updateShaderValues()
 {
+	std::vector <float> trans_func_points_color;
+	for each (glm::vec2 p in gui.trans_func_points_color)
+	{
+		trans_func_points_color.push_back(p.x);
+		trans_func_points_color.push_back(p.y);
+	}
+	std::vector <float> trans_func_points_density;
+	for each (glm::vec2 p in gui.trans_func_points_density)
+	{
+		trans_func_points_density.push_back(p.x);
+		trans_func_points_density.push_back(p.y);
+	}
+
 	rayMarchShader.use();
 	rayMarchShader.setMat4("model", model);
 	rayMarchShader.setMat4("view", camera.getViewMatrix());
 	rayMarchShader.setMat4("projection", camera.getProjectionMatrix());
-	rayMarchShader.setFloat("stepSize", gui_stepSize);
+	rayMarchShader.setFloat("stepSize", gui.stepSize);
+	rayMarchShader.setInt("numberOfColorPoints", gui.trans_func_points_color.size());
+	rayMarchShader.setListVec2("transfer_function_color", trans_func_points_color);
+	rayMarchShader.setInt("numberOfDensityPoints", gui.trans_func_points_density.size());
+	rayMarchShader.setListVec2("transfer_function_density", trans_func_points_density);
 
 	monteCarloShader.use();
 	monteCarloShader.setMat4("model", model);
 	monteCarloShader.setMat4("view", camera.getViewMatrix());
 	monteCarloShader.setMat4("projection", camera.getProjectionMatrix());
-	monteCarloShader.setInt("samplesPerFrame", gui_samplesPerFrame);
+	monteCarloShader.setInt("samplesPerFrame", gui.samplesPerFrame);
 	monteCarloShader.setFloat("randomizer", (float)glfwGetTime());
+	monteCarloShader.setFloat("brightness", gui.brightness);
+	monteCarloShader.setInt("numberOfColorPoints", gui.trans_func_points_color.size());
+	monteCarloShader.setListVec2("transfer_function_color", trans_func_points_color);
+	monteCarloShader.setInt("numberOfDensityPoints", gui.trans_func_points_density.size());
+	monteCarloShader.setListVec2("transfer_function_density", trans_func_points_density);
 
 	accumulationShader.use();
 	accumulationShader.setInt("runs", accumulatedFrames);
-	accumulationShader.setInt("samplesPerRun", gui_samplesPerFrame);
-	
+	accumulationShader.setInt("samplesPerRun", gui.samplesPerFrame);
+
 }

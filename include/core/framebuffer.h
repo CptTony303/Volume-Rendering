@@ -3,7 +3,8 @@
 
 class Framebuffer {
 public:
-	Framebuffer();
+	Framebuffer() {};
+	Framebuffer(int width, int height);
 	unsigned int getID();
 	unsigned int getTexture();
 private:

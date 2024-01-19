@@ -7,15 +7,18 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include <core/camera.h>
+#include <core/GUI/volumeGUI.h>
 
 class VolumeScene{
 public:
-	VolumeScene();
+	VolumeScene() {};
+	VolumeScene(int width, int height);
 	void initScene();
 	void renderScene();
 	void processInput(GLFWwindow* window, float delta);
 	//callback functions
 	void scroll_callback(double xoffset, double yoffset);
+	void framebuffer_size_callback(int width, int height);
 private:
 	void initTransformationMatrices();
 	void initVolumeVAO();
@@ -39,11 +42,7 @@ private:
 	Framebuffer FBO_VOLUME, FBO_ACCUMULATION, FBO_LAST_FRAME; //Framebuffers
 
 	int accumulatedFrames = 0; //number of accumulated frames for monte carlo
-
-	//GUI variables:
-	int gui_methode = 0;
-	float gui_stepSize = 0.01f;
-	int gui_samplesPerFrame = 5;
+	VolumeGUI gui;
 };
 
 #endif

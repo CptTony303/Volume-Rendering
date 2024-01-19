@@ -6,12 +6,16 @@
 #include <glm/gtx/string_cast.hpp>
 #define GLFW_INCLUDE_NONE
 #include <core/window.h>
+#include <atomic>
+#include <mutex>
 
 
 Camera::Camera()
 {
 }
+
 float g_view_angle = 45.f;
+//std::mutex view_angle_mutex;
 
 Camera::Camera(glm::vec3 position, glm::vec3 view_direction, glm::vec3 up_direction,
 	float view_angle, float image_ratio, float min_distance, float max_distance)
@@ -121,21 +125,25 @@ bool Camera::processInput(GLFWwindow* window, float delta)
 
 	//change zoom
 	if (g_view_angle != _view_angle) {
+		//view_angle_mutex.lock();
 		_view_angle = g_view_angle;
+		//view_angle_mutex.unlock();
 		update_projection();
 		modified = true;
 	}
 
 	return modified;
 }
-int test = 1;
 void Camera::scroll_callback(double xoffset, double yoffset)
 {
+	//view_angle_mutex.lock();
 	g_view_angle -= (float)yoffset;
-	//if (_view_angle < 1.0f)
-	//	_view_angle = 1.0f;
-	//if (_view_angle > 45.0f)
-	//	_view_angle = 45.0f;
+	if (g_view_angle < 1.f)
+		g_view_angle = 1.f;
+	if (g_view_angle > 179.0f)
+		g_view_angle = 179.0f;
+	
+	//view_angle_mutex.unlock();
 }
 
 void Camera::update_view()
