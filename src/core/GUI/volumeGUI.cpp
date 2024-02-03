@@ -31,9 +31,10 @@ void VolumeGUI::renderMethodeTab()
 		ImGui::Text("Select your render methode:");
 		ImGui::RadioButton("Ray Marching", &methode, 0); ImGui::SameLine();
 		ImGui::RadioButton("Monte Carlo Sampling", &methode, 1);
-		//ImGui::Text("\nJust for debug purposes:");
-		//ImGui::RadioButton("Just rng demo", &methode, 2); ImGui::SameLine();
-		//ImGui::RadioButton("colored cube", &methode, -1);
+		ImGui::Text("\nJust for debug purposes:");
+		ImGui::RadioButton("Just rng demo", &methode, 2); ImGui::SameLine();
+		ImGui::RadioButton("Transfer Function visualization", &methode, 3);
+		ImGui::RadioButton("colored cube", &methode, 4);
 		if (methode == 0) {
 			ImGui::Text("\nSet the step size for the ray march:");
 			ImGui::SliderFloat("stepSize", &stepSize, 0.001f, 0.02f, "%.5f");

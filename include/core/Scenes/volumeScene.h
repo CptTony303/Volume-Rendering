@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 #include <core/camera.h>
 #include <core/GUI/volumeGUI.h>
+#include <vector>
 
 class VolumeScene{
 public:
@@ -29,6 +30,7 @@ private:
 	void initVolumeShaders();
 	void initAccumulationShader();
 	void initCopyShader();
+	void initDebugShaders();
 	void renderGUI();
 	void renderVolume();
 	void accumulateFrames();
@@ -38,10 +40,11 @@ private:
 	glm::mat4 model, view, projection;
 	Camera camera;
 	unsigned int VAO_VOLUME, VAO_FRAME; //VAOs
-	Shader monteCarloShader, rayMarchShader, accumulationShader, copyShader; //Shaders
+	Shader monteCarloShader, rayMarchShader, accumulationShader, copyShader, transferFunctionShader, volumeDebugShader; //Shaders
 	Framebuffer FBO_VOLUME, FBO_ACCUMULATION, FBO_LAST_FRAME; //Framebuffers
 
-	int accumulatedFrames = 0; //number of accumulated frames for monte carlo
+	int accumulatedFrames = -1; //number of accumulated frames for monte carlo
+	//std::vector <float> trans_func_points_color = {0.f};
 	VolumeGUI gui;
 };
 

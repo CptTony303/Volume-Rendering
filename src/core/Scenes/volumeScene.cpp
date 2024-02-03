@@ -10,6 +10,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <core/camera.h>
 #include <core/GUI/volumeGUI.h>
+#include <vector>
 
 int g_width = 1500, g_height = 1200;
 
@@ -23,6 +24,13 @@ void VolumeScene::initScene() {
 	initVAOs();
 	initFBOs();
 	gui = VolumeGUI();
+	std::vector <float> trans_func_points_color = { 0.f };
+	trans_func_points_color.clear();
+	for (int i = 0; i < gui.trans_func_points_color.size(); i++)
+	{
+		trans_func_points_color.push_back(gui.trans_func_points_color[i].x);
+		trans_func_points_color.push_back(gui.trans_func_points_color[i].y);
+	}
 	initShaders();
 }
 
@@ -163,6 +171,7 @@ void VolumeScene::initShaders()
 	initVolumeShaders();
 	initAccumulationShader();
 	initCopyShader();
+	initDebugShaders();
 	updateShaderValues();
 }
 
@@ -171,13 +180,14 @@ void VolumeScene::initVolumeShaders()
 	//dynamic volume path and size
 	Texture3D volumeData("C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/Assets/foot_256x256x256_uint8.raw", GL_TEXTURE3, glm::vec3(256, 256, 256));
 
-	const char* vertPathMonteCarlo = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/volume.vert";
+	const char* vertPathMonteCarlo = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/monte_carlo.vert";
 	const char* fragPathMonteCarlo = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/monte_carlo.frag";
 
 	monteCarloShader = Shader(vertPathMonteCarlo, fragPathMonteCarlo);
 	monteCarloShader.use();
 
 	monteCarloShader.setInt("volume", 3);
+	monteCarloShader.setInt("convergedFrame", 1);
 
 	const char* vertPathRayMarch = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/volume.vert";
 	const char* fragPathRayMarch = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/ray_marching.frag";
@@ -220,6 +230,23 @@ void VolumeScene::initCopyShader()
 	copyShader.setInt("screenTexture", 1);
 }
 
+void VolumeScene::initDebugShaders()
+{
+	//transfer function shader
+	const char* vertPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/copy.vert";
+	const char* fragPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/transfer_function.frag";
+
+	transferFunctionShader = Shader(vertPath, fragPath);
+	transferFunctionShader.use();
+
+	//volume debug shader
+	const char* vertPathDebug = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/volume.vert";
+	const char* fragPathDebug = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/volume_debug.frag";
+
+	volumeDebugShader = Shader(vertPathDebug, fragPathDebug);
+	volumeDebugShader.use();
+}
+
 void VolumeScene::renderGUI()
 {
 	gui.renderGUI();
@@ -244,22 +271,39 @@ void VolumeScene::renderGUI()
 void VolumeScene::renderVolume()
 {
 	glBindVertexArray(VAO_VOLUME);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); //draw on screen
 
 	switch (gui.methode) {
+	case 0://ray marching
+		accumulatedFrames = -1;
+		rayMarchShader.use();
+		break;
 	case 1://monte carlo
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO_VOLUME.getID()); //draw into framebuffer
 		monteCarloShader.use();
 		break;
-	default:
-		accumulatedFrames = 0;
-		glBindFramebuffer(GL_FRAMEBUFFER, 0); //else draw on screen
-		rayMarchShader.use();
+	case 3://transfer function
+		accumulatedFrames = -1;
+		glBindVertexArray(VAO_FRAME);
+		transferFunctionShader.use();
+		break;
+	case 2:
+	case 4://rng
+		accumulatedFrames = -1;
+		volumeDebugShader.use();
+		break;
 	}
 	glClearColor(0.f, 0.f, 0.f, 1.0f); //set clear color
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glEnable(GL_DEPTH_TEST);
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	if (gui.methode != 3) {
+
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	}
+	else {
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
 
 	if (gui.methode == 1) { //if monte carlo
 		VolumeScene::accumulateFrames(); //accumulate frames
@@ -295,7 +339,14 @@ void VolumeScene::accumulateFrames()
 }
 void VolumeScene::updateShaderValues()
 {
-	std::vector <float> trans_func_points_color;
+	std::vector <float> trans_func_points_color = { 0.f };
+	trans_func_points_color;
+	std::vector <float> last_trans_func_points_color;
+	for each (float v in trans_func_points_color)
+	{
+		last_trans_func_points_color.push_back(v);
+	}
+	trans_func_points_color.clear();
 	for each (glm::vec2 p in gui.trans_func_points_color)
 	{
 		trans_func_points_color.push_back(p.x);
@@ -322,6 +373,10 @@ void VolumeScene::updateShaderValues()
 	monteCarloShader.setMat4("model", model);
 	monteCarloShader.setMat4("view", camera.getViewMatrix());
 	monteCarloShader.setMat4("projection", camera.getProjectionMatrix());
+
+	monteCarloShader.setFloat("screenSize_x", (float)g_width);
+	monteCarloShader.setFloat("screenSize_y", (float)g_height);
+
 	monteCarloShader.setInt("samplesPerFrame", gui.samplesPerFrame);
 	monteCarloShader.setFloat("randomizer", (float)glfwGetTime());
 	monteCarloShader.setFloat("brightness", gui.brightness);
@@ -330,8 +385,24 @@ void VolumeScene::updateShaderValues()
 	monteCarloShader.setInt("numberOfDensityPoints", gui.trans_func_points_density.size());
 	monteCarloShader.setListVec2("transfer_function_density", trans_func_points_density);
 
+	monteCarloShader.setInt("lastNumberOfColorPoints", last_trans_func_points_color.size() / 2);
+	monteCarloShader.setListVec2("transfer_function_color", last_trans_func_points_color);
+
+
 	accumulationShader.use();
 	accumulationShader.setInt("runs", accumulatedFrames);
 	accumulationShader.setInt("samplesPerRun", gui.samplesPerFrame);
 
+	transferFunctionShader.use();
+	transferFunctionShader.setInt("numberOfColorPoints", gui.trans_func_points_color.size());
+	transferFunctionShader.setListVec2("transfer_function_color", trans_func_points_color);
+	transferFunctionShader.setInt("numberOfDensityPoints", gui.trans_func_points_density.size());
+	transferFunctionShader.setListVec2("transfer_function_density", trans_func_points_density);
+
+	volumeDebugShader.use();
+	volumeDebugShader.setMat4("model", model);
+	volumeDebugShader.setMat4("view", camera.getViewMatrix());
+	volumeDebugShader.setMat4("projection", camera.getProjectionMatrix());
+	volumeDebugShader.setFloat("randomizer", (float)glfwGetTime());
+	volumeDebugShader.setInt("methode", gui.methode);
 }

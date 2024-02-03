@@ -13,7 +13,7 @@ public:
 	int methode = 0;
 	float stepSize = 0.01f;
 	int samplesPerFrame = 5;
-	float brightness = 25.f;
+	float brightness = 10.f;
 	std::vector<glm::vec2> trans_func_points_color = { glm::vec2(0.f,0.f),glm::vec2(0.5f,0.5f),glm::vec2(1.f,1.f) };
 	std::vector<glm::vec2> trans_func_points_density = { glm::vec2(0.f,0.f),glm::vec2(0.5f,0.5f),glm::vec2(1.f,1.f) };
 	bool reset_accumulation_frames;
