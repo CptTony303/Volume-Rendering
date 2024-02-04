@@ -24,12 +24,13 @@ void VolumeScene::initScene() {
 	initVAOs();
 	initFBOs();
 	gui = VolumeGUI();
-	std::vector <float> trans_func_points_color = { 0.f };
+
 	trans_func_points_color.clear();
+	trans_func_points_color.resize(gui.trans_func_points_color.size() * 2);
 	for (int i = 0; i < gui.trans_func_points_color.size(); i++)
 	{
-		trans_func_points_color.push_back(gui.trans_func_points_color[i].x);
-		trans_func_points_color.push_back(gui.trans_func_points_color[i].y);
+		trans_func_points_color[i * 2] = gui.trans_func_points_color[i].x;
+		trans_func_points_color[i * 2 + 1] = gui.trans_func_points_color[i].y;
 	}
 	initShaders();
 }
@@ -252,19 +253,18 @@ void VolumeScene::renderGUI()
 	gui.renderGUI();
 	if (gui.reset_accumulation_frames) {
 		accumulatedFrames = 0;
-		gui.reset_accumulation_frames = false;
-		std::cout << "\nColors:\n";
-		for each (glm::vec2 p in gui.trans_func_points_color)
-		{
-			std::cout << "(" << p.x << "," << p.y << ") , ";
-		}
-		std::cout << std::endl;
-		std::cout << "Density:\n";
-		for each (glm::vec2 p in gui.trans_func_points_density)
-		{
-			std::cout << "(" << p.x << "," << p.y << ") , ";
-		}
-		std::cout << "\n" << std::endl;
+		//std::cout << "\nColors:\n";
+		//for each (glm::vec2 p in gui.trans_func_points_color)
+		//{
+		//	std::cout << "(" << p.x << "," << p.y << ") , ";
+		//}
+		//std::cout << std::endl;
+		//std::cout << "Density:\n";
+		//for each (glm::vec2 p in gui.trans_func_points_density)
+		//{
+		//	std::cout << "(" << p.x << "," << p.y << ") , ";
+		//}
+		//std::cout << "\n" << std::endl;
 	}
 }
 
@@ -339,18 +339,23 @@ void VolumeScene::accumulateFrames()
 }
 void VolumeScene::updateShaderValues()
 {
-	std::vector <float> trans_func_points_color = { 0.f };
-	trans_func_points_color;
 	std::vector <float> last_trans_func_points_color;
-	for each (float v in trans_func_points_color)
-	{
-		last_trans_func_points_color.push_back(v);
-	}
-	trans_func_points_color.clear();
-	for each (glm::vec2 p in gui.trans_func_points_color)
-	{
-		trans_func_points_color.push_back(p.x);
-		trans_func_points_color.push_back(p.y);
+	if (gui.reset_accumulation_frames) {
+
+		for (int i = 0; i < trans_func_points_color.size(); i++)
+		{
+			last_trans_func_points_color.push_back(trans_func_points_color[i]);
+		}
+		if (trans_func_points_color.size() != gui.trans_func_points_color.size() * 2) {
+			trans_func_points_color.clear();
+			trans_func_points_color.shrink_to_fit();
+			trans_func_points_color.resize(gui.trans_func_points_color.size() * 2);
+		}
+		for (int i = 0; i < gui.trans_func_points_color.size(); i++)
+		{
+			trans_func_points_color[i * 2] = gui.trans_func_points_color[i].x;
+			trans_func_points_color[i * 2 + 1] = gui.trans_func_points_color[i].y;
+		}
 	}
 	std::vector <float> trans_func_points_density;
 	for each (glm::vec2 p in gui.trans_func_points_density)
@@ -387,6 +392,7 @@ void VolumeScene::updateShaderValues()
 
 	monteCarloShader.setInt("lastNumberOfColorPoints", last_trans_func_points_color.size() / 2);
 	monteCarloShader.setListVec2("transfer_function_color", last_trans_func_points_color);
+	monteCarloShader.setBool("trans_func_changed", gui.reset_accumulation_frames);
 
 
 	accumulationShader.use();
@@ -405,4 +411,6 @@ void VolumeScene::updateShaderValues()
 	volumeDebugShader.setMat4("projection", camera.getProjectionMatrix());
 	volumeDebugShader.setFloat("randomizer", (float)glfwGetTime());
 	volumeDebugShader.setInt("methode", gui.methode);
+
+	gui.reset_accumulation_frames = false;
 }

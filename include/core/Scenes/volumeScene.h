@@ -44,7 +44,7 @@ private:
 	Framebuffer FBO_VOLUME, FBO_ACCUMULATION, FBO_LAST_FRAME; //Framebuffers
 
 	int accumulatedFrames = -1; //number of accumulated frames for monte carlo
-	//std::vector <float> trans_func_points_color = {0.f};
+	std::vector <float> trans_func_points_color = {0.f};
 	VolumeGUI gui;
 };
 
