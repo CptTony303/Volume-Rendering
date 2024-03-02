@@ -1,19 +1,27 @@
+#ifndef RENDERER_H
+#define RENDERER_H
+
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <core/shader.h>
 #include <glm/glm.hpp>
+#include <core/Scenes/volumeScene.h>
 
 class Renderer
 {
 public:
-	Renderer(GLFWwindow* window);
+	Renderer() {};
+	Renderer(int width, int height);
 	//void loadScene(Scene* scene);
 	void renderScene();
+	void processInput(GLFWwindow* window, float delta);
 	void init();
+	//callback functions
+	void scroll_callback(double xoffset, double yoffset);
+	void framebuffer_size_callback(int width, int height);
 private:
-	GLFWwindow* _window;
-	unsigned int VAO;
-	Shader* myShader;
-	glm::vec3 _cam_pos;
-	glm::vec3 _cam_rot;
+	VolumeScene scene;
 };
+
+#endif // !RENDERER_H
