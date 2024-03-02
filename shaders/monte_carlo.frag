@@ -17,6 +17,7 @@ uniform vec2 transfer_function_density[100];
 uniform int lastNumberOfColorPoints;
 uniform vec2 last_transfer_function_color[100];
 uniform sampler2D convergedFrame;
+uniform bool trans_func_changed;
 
 uniform float brightness;
 uniform int samplesPerFrame;

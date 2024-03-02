@@ -29,12 +29,8 @@ Window* Window::getInstance()
 	{
 		window = new Window();
 		//window->startRenderLoop();
-		return window;
 	}
-	else
-	{
 		return window;
-	}
 }
 
 void Window::registerCallback(GLFWwindow* glfw_window, int type, void* func)
