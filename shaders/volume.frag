@@ -7,14 +7,10 @@ out vec4 FragColor;
 
 in vec3 modelPos; //intersection with cube in model position
 
-<<<<<<< HEAD
-uniform sampler3D volumeTexture; //texture of the volume
-=======
 float optical_thickness = 0.f;
 float accumulated_transmittance = 1.f;
 
 uniform sampler3D texture3; //texture of the volume
->>>>>>> laptop
 uniform float isovalue; //treshold for the density
 uniform int brightness;
 uniform float stepSize;
@@ -223,11 +219,7 @@ vec4 rayMarch()
 //    scale.z = length(vec3(model[2]));
 
 
-<<<<<<< HEAD
-    float stepSize = 0.001f; // Schrittweite
-=======
     //float stepSize = 0.01f; // Schrittweite
->>>>>>> laptop
     float maxDistance = 1.8; // Maximaler Distanz für den Marsch = 1.8 weil wurzel 3 =diagonale vom 3dim Würfel 
 
     vec3 currentPosition = modelPos;
@@ -243,21 +235,11 @@ vec4 rayMarch()
     for (float i = 0.0; i <= maxDistance; i += stepSize)
     {
         vec3 texCoord = currentPosition+vec3(0.5f);
-<<<<<<< HEAD
-        vec3 reversedTexCoord = vec3(1.0 - texCoord.x, texCoord.z, texCoord.y);
-        float density = texture(volumeTexture, texCoord).r;
-        if(density > isovalue){
-            dist += distance(model * vec4(currentPosition, 1.f), model * vec4(modelPos,1.f));
-            vec3 color = texCoord;
-            return vec4(color, 1.f);
-        }
-=======
         float density = texture(texture3, texCoord).r;
         density = density > isovalue ? density : 0.f;
 
 //        vec4 L = RayMarch_methode_3(density, last_Lx); rgba += L; last_Lx = vec3(L) * 2 * (1/stepSize);  //methode 3
         vec4 L = RayMarch_methode_4(density, last_Lx);rgba += L;last_Lx = L * 2 * (1/stepSize);  //methode 4
->>>>>>> laptop
 
         currentPosition += direction * stepSize;
     }

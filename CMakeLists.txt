@@ -33,28 +33,6 @@ foreach(FILE ${SRCS})
     source_group("${GROUP}" FILES ${FILE})
 endforeach()
 
-<<<<<<< HEAD
-#installiere imgui
-set(IMGUI_SOURCES
-    lib/imgui/imgui.cpp
-    lib/imgui/imgui_demo.cpp
-    lib/imgui/imgui_draw.cpp
-    lib/imgui/imgui_widgets.cpp
-    lib/imgui/imgui_tables.cpp
-)
-
-
-#installiere glad
-set(GLAD_SOURCES
-    lib/glad/src/glad.c
-    lib/stb_image/stb_image.cpp
-)
-
-add_executable(VolumeRenderer ${SRCS} ${INCLUDE} ${GLAD_SOURCES} ${IMGUI_SOURCES})
-
-target_include_directories(VolumeRenderer PRIVATE lib/imgui)
-target_include_directories(VolumeRenderer PRIVATE lib/glad/include)
-=======
 set(IMGUI_SOURCES
     lib/imgui/imgui_demo.cpp
     lib/imgui/imgui_draw.cpp
@@ -72,7 +50,6 @@ target_include_directories(VolumeRenderer PRIVATE lib/imgui)
 target_include_directories(VolumeRenderer PRIVATE lib/imgui/backends)
 # Add any required dependencies here
 target_link_libraries(VolumeRenderer PRIVATE ${CONAN_LIBS})  # Example for using Conan package manager
->>>>>>> laptop
 
 # Verknüpfe die Anwendung mit der GLFW-Bibliothek
 add_subdirectory(lib/glfw)
