@@ -55,10 +55,15 @@ target_link_libraries(VolumeRenderer PRIVATE ${CONAN_LIBS})  # Example for using
 add_subdirectory(lib/glfw)
 target_link_libraries(VolumeRenderer PRIVATE glfw)
 
+#installiere GLAD
+include_directories(lib/glad/include)
+#add_executable(VolumeRenderer lib/glad/src/glad.c)
+#target_link_libraries(VolumeRenderer PRIVATE glad)
 
 # Installiere GLM
 add_subdirectory(lib/glm)
 target_link_libraries(VolumeRenderer PRIVATE glm)
+
 
 # Füge OpenGL als Abhängigkeit hinzu
 find_package(OpenGL REQUIRED)
@@ -69,6 +74,4 @@ include_directories(lib/stb_image/include)
 
 #load shader
 file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})
-
-
 
