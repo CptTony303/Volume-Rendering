@@ -4,7 +4,10 @@
 class Texture {
 public:
 	unsigned int ID;
-	Texture(char * texturePath, unsigned int glTextureUnit, unsigned int glColorChannel);
+	Texture(int width, int height, int* data, unsigned int glColorChannel);
+	Texture(char * texturePath, unsigned int glColorChannel);
+private:
+	void init(int width, int height, int* data, unsigned int glColorChannel);
 };
 
 #endif

@@ -5,11 +5,11 @@
 #include <sstream>
 #include <vector>
 
-Texture3D::Texture3D(char * texturePath, unsigned int glTextureUnit, glm::vec3 dimensions) {
+Texture3D::Texture3D(char * texturePath, glm::vec3 dimensions) {
 	glEnable(GL_TEXTURE_3D);
 	unsigned int texture;
 	glGenTextures(1, &texture);
-	glActiveTexture(glTextureUnit);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_3D, texture);
 	// Setze die Texturparameter
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -43,7 +43,7 @@ Texture3D::Texture3D(char * texturePath, unsigned int glTextureUnit, glm::vec3 d
 		/*for (uint8_t value : data) {
 			std::cout << static_cast<int>(value) << " ";
 		}*/
-		// Hier kannst du nun die Daten verwenden
+		/*
 		std::vector <uint8_t> blownUpData(fileSize);
 		int index = 0;
 		for (int z = 0; z < depth; z++) {
@@ -54,6 +54,7 @@ Texture3D::Texture3D(char * texturePath, unsigned int glTextureUnit, glm::vec3 d
 				}
 			}
 		}
+		*/
 		glPixelStorei(GL_UNPACK_LSB_FIRST, true);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
 		glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, height);

@@ -8,7 +8,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-
+/*
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	Renderer* renderer = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
@@ -168,7 +168,7 @@ void Window::initWindow()
 		return;
 	}
 
-	renderer = &Renderer();
+	renderer = &Renderer(1,1);
 	renderer->init();
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -188,3 +188,4 @@ void Window::processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 
 }
+*/

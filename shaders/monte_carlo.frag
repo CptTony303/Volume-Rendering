@@ -15,9 +15,9 @@ uniform int numberOfDensityPoints;
 uniform vec2 transfer_function_density[100];
 
 uniform int lastNumberOfColorPoints;
-uniform vec2 last_transfer_function_color[100];
+uniform vec2 transfer_function_control[100];
 uniform sampler2D convergedFrame;
-uniform bool trans_func_changed;
+uniform bool useControlVariate;
 
 uniform float brightness;
 uniform int samplesPerFrame;
@@ -101,6 +101,30 @@ vec3 transferFunctionColor(float value){
     float blue = color < 0 ? color * -2.f : 0;;
     return vec3(red, green, blue);
 }
+vec3 transferFunctionControl(float value){
+    float color = -1;
+    for(int i = 0; i < lastNumberOfColorPoints; i++){
+        if(value<=transfer_function_control[i].x && color < 0){
+            //check for out of bounds
+            if(i == 0){
+                value = transfer_function_control[i].y;
+            }else{
+            //linear interpolation
+                float y0 = transfer_function_control[i-1].y;
+                float y1 = transfer_function_control[i].y;
+                float x0 = transfer_function_control[i-1].x;
+                float x1 = transfer_function_control[i].x;
+                float x = value;
+                color = (y0*(x1-x)+y1*(x-x0))/(x1-x0);
+            }
+        }
+    }
+    color -= 0.5;
+    float red = color > 0 ? color * 2.f : 0;
+    float green = 1.f - 2.f* abs(color);
+    float blue = color < 0 ? color * -2.f : 0;;
+    return vec3(red, green, blue);
+}
 
 vec4 deltaTracking(vec3 w){
     vec3 x = modelPos;
@@ -122,7 +146,11 @@ vec4 deltaTracking(vec3 w){
         float density = transferFunctionDensity(volumeData)*brightness;
 
         if(rng2 < density/mu){
-            return vec4(transferFunctionColor(volumeData),1.f);
+            vec4 color = vec4(transferFunctionColor(volumeData),1.f);
+            if(useControlVariate){
+                color.xyz -= transferFunctionControl(volumeData);
+            }
+            return color;
         }
         if(distance(x,modelPos) > 1.8){ //out of volume (1.8 ist längste diagonale eines Würfels)
             return vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -153,4 +181,7 @@ void main(){
     }
 
     FragColor = color/sample_nr;
+    if(useControlVariate){
+        FragColor.xyz += texture(convergedFrame, lastFrameCoord).rgb;
+    }
 }

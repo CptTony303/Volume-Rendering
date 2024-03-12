@@ -9,32 +9,19 @@
 #include <atomic>
 #include <mutex>
 
-
-Camera::Camera()
+Camera::Camera(float imageRatio)
 {
-}
+	glm::vec3 cam_pos = glm::vec3(-3.0f, 0.0f, 0.0f);
+	glm::vec3 cam_view_dir = glm::vec3(1.f, 0.f, 0.f);
+	glm::vec3 cam_up_dir = glm::vec3(0.f, 1.f, 0.f);
 
-float g_view_angle = 45.f;
-//std::mutex view_angle_mutex;
-
-Camera::Camera(glm::vec3 position, glm::vec3 view_direction, glm::vec3 up_direction,
-	float view_angle, float image_ratio, float min_distance, float max_distance)
-{
-	_position = position;
-	_view_direction = glm::normalize(view_direction);
-	_up_direction = glm::normalize(up_direction);
-	_view_angle = view_angle;
-	g_view_angle = _view_angle;
-	_image_ratio = image_ratio;
-	_min_distance = min_distance;
-	_max_distance = max_distance;
-
-	//safe init values for reset
-	_init_view_direction = _view_direction;
-	_init_position = _position;
-	_init_view_angle = _view_angle;
-	_init_min_distance = _min_distance;
-	_init_max_distance = _max_distance;
+	_position = cam_pos;
+	_view_direction = glm::normalize(cam_view_dir);
+	_up_direction = glm::normalize(cam_up_dir);
+	_view_angle = 45.f;
+	_image_ratio = imageRatio;
+	_min_distance = 0.1f;
+	_max_distance = 100.f;
 
 	update_view();
 	update_projection();
@@ -49,7 +36,20 @@ glm::mat4 Camera::getProjectionMatrix()
 {
 	return projection;
 }
+void Camera::update_view()
+{
+	_view_direction = glm::normalize(_view_direction);
+	view = glm::lookAt(_position, _position + _view_direction, _up_direction);
+}
 
+void Camera::update_projection()
+{
+	projection = glm::perspective(glm::radians(_view_angle), _image_ratio, _min_distance, _max_distance);
+}
+
+
+//move all input to live-app
+/*
 bool Camera::processInput(GLFWwindow* window, float delta)
 {
 	bool modified = false;
@@ -146,17 +146,6 @@ void Camera::scroll_callback(double xoffset, double yoffset)
 	//view_angle_mutex.unlock();
 }
 
-void Camera::update_view()
-{
-	_view_direction = glm::normalize(_view_direction);
-	view = glm::lookAt(_position, _position + _view_direction, _up_direction);
-}
-
-void Camera::update_projection()
-{
-	projection = glm::perspective(glm::radians(_view_angle), _image_ratio, _min_distance, _max_distance);
-}
-
 void Camera::reset_camera()
 {
 	//view
@@ -170,3 +159,5 @@ void Camera::reset_camera()
 	_max_distance = _init_max_distance;
 	update_projection();
 }
+
+*/
