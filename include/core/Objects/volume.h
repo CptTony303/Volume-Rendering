@@ -11,7 +11,7 @@ class Volume : public Object
 public:
 	Volume() : VAO(0),
 		data(Texture3D(
-			"X:/Anton/Projects/Programming/C/Volume-Rendering/Assets/foot_256x256x256_uint8.raw",
+			"./Assets/foot_256x256x256_uint8.raw",
 			glm::vec3(256))),
 		modelMatrix(glm::mat4(1.0f)) {
 		glGenVertexArrays(1, &VAO);

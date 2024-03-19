@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 project(VolumeRenderer)
+set(CMAKE_CXX_STANDARD 17) # Setze C++17 als die verwendete Version
+set(CMAKE_CXX_STANDARD_REQUIRED ON) # Fordere die Verwendung der angegebenen C++-Version
+set(CMAKE_CXX_EXTENSIONS OFF) # Deaktiviere Compiler-Erweiterungen, die nicht Teil des Standards sind
+
 
 include_directories(include)
 
@@ -74,4 +78,7 @@ include_directories(lib/stb_image/include)
 
 #load shader
 file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})
+
+#load Assets
+file(COPY ${CMAKE_SOURCE_DIR}/Assets DESTINATION ${CMAKE_BINARY_DIR})
 

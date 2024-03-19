@@ -11,6 +11,7 @@
 #include <core/texture3D.h>
 #include <imgui.h>
 #include <core/Scenes/volumeScene.h>
+#include <filesystem>
 
 
 void Renderer::init() {
@@ -81,8 +82,8 @@ void Renderer::initVolumeShaders() // in renderer
 	//dynamic volume path and size
 	//Texture3D volumeData("C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/Assets/foot_256x256x256_uint8.raw", GL_TEXTURE3, glm::vec3(256, 256, 256));
 
-	const char* vertPathMonteCarlo = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/monte_carlo.vert";
-	const char* fragPathMonteCarlo = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/monte_carlo.frag";
+	const char* vertPathMonteCarlo = "./shaders/monte_carlo.vert";
+	const char* fragPathMonteCarlo = "./shaders/monte_carlo.frag";
 
 	shaders[MC] = Shader(vertPathMonteCarlo, fragPathMonteCarlo);
 	shaders[MC].use();
@@ -90,8 +91,8 @@ void Renderer::initVolumeShaders() // in renderer
 	shaders[MC].setInt("volume", 0);
 	shaders[MC].setInt("convergedFrame", 1);
 
-	const char* vertPathRayMarch = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/volume.vert";
-	const char* fragPathRayMarch = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/ray_marching.frag";
+	const char* vertPathRayMarch = "./shaders/volume.vert";
+	const char* fragPathRayMarch = "./shaders/ray_marching.frag";
 
 	shaders[RM] = Shader(vertPathRayMarch, fragPathRayMarch);
 	shaders[RM].use();
@@ -100,8 +101,8 @@ void Renderer::initVolumeShaders() // in renderer
 }
 void Renderer::initAccumulationShader() // in renderer
 {
-	const char* vertPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/copy.vert";
-	const char* fragPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/accumulation.frag";
+	const char* vertPath = "./shaders/copy.vert";
+	const char* fragPath = "./shaders/accumulation.frag";
 
 	shaders[ACC] = Shader(vertPath, fragPath);
 	shaders[ACC].use();
@@ -112,8 +113,8 @@ void Renderer::initAccumulationShader() // in renderer
 
 void Renderer::initCopyShader() // in renderer
 {
-	const char* vertPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/copy.vert";
-	const char* fragPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/copy.frag";
+	const char* vertPath = "./shaders/copy.vert";
+	const char* fragPath = "./shaders/copy.frag";
 
 	shaders[COPY] = Shader(vertPath, fragPath);
 	shaders[COPY].use();

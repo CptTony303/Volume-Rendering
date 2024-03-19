@@ -11,7 +11,7 @@ public:
 		height(1080),
 		renderer(nullptr),
 		glfw_window(nullptr),
-		resultsFolder("X:/Anton/Projects/Programming/C/Volume-Rendering/results/") {
+		resultsFolder("./results/") {
 		init();
 	};
 	void generateTestImages();

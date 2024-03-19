@@ -55,54 +55,6 @@ void Tester::depricated() {
 	//renderer.setTransferFunctions(vector<float>);
 	//renderer.setControlVariates(texture);
 
-	for (int i = 0; i < 1; i++) {
-		renderer->renderScene();
-	}
-	saveImage("5_samples_without_control_variate_multi_color");
-	renderer->resetAccumulatedFrames();
-	//renderer->setVolumePosition(glm::rotate(glm::mat4(1.f), glm::radians(90.f),glm::vec3(0,1,0)));
-	for (int i = 0; i < 12; i++) {
-		renderer->renderScene();
-	}
-	saveImage("60_samples_without_control_variate_multi_color");
-	renderer->setControlVariate();
-	renderer->resetAccumulatedFrames();
-	renderer->setUseControlVariate(false);
-	renderer->setTransferFunction({ 0.0,0.3,1.0,0.7 }, Renderer::COLOR);
-	for (int i = 0; i < 1; i++) {
-		renderer->renderScene();
-	}
-	saveImage("5_samples_without_control_variate_green");
-	renderer->resetAccumulatedFrames();
-	for (int i = 0; i < 12; i++) {
-		renderer->renderScene();
-	}
-	saveImage("60_samples_without_control_variate_green");
-	renderer->resetAccumulatedFrames();
-	renderer->setUseControlVariate(true);
-	for (int i = 0; i < 1; i++) {
-		renderer->renderScene();
-	}
-	saveImage("5_samples_with_control_variate_green");
-	renderer->resetAccumulatedFrames();
-	for (int i = 0; i < 6; i++) {
-		renderer->renderScene();
-	}
-	saveImage("30_samples_with_control_variate_green");
-	renderer->setControlVariate();
-	renderer->setTransferFunction({ 0.0,0.0,1.0,1.0 }, Renderer::COLOR);
-	renderer->resetAccumulatedFrames();
-	for (int i = 0; i < 1; i++) {
-		renderer->renderScene();
-	}
-	saveImage("5_samples_with_control_variate_multi_color");
-	renderer->resetAccumulatedFrames();
-	for (int i = 0; i < 6; i++) {
-		renderer->renderScene();
-	}
-	saveImage("30_samples_with_control_variate_multi_color");
-
-
 }
 void Tester::runSingleTestcase(std::vector<float> transferFunction, int nrOfRendersteps,
 		Renderer::RenderMethods renderMethod, bool useControlVariate,
@@ -129,7 +81,7 @@ void Tester::saveImage(std::string fileName)
 	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
 	stbi_flip_vertically_on_write(1);
 	std::string fullPath;
-	fullPath.append(resultsFolder)/*.append(currentFolder)*/.append(fileName).append(".png");
+	fullPath.append(resultsFolder).append(currentFolder).append(fileName).append(".png");
 	stbi_write_png(fullPath.c_str(), width, height, 3, buffer, width * 3);
 }
 
@@ -165,6 +117,8 @@ void Tester::init()
 	createDirectory(newFolder);
 
 	this->generateTestImages();
+
+	glfwTerminate();
 }
 std::string Tester::getCurrentTimeAsString() {
 	auto now = std::chrono::system_clock::now();
@@ -180,7 +134,7 @@ std::string Tester::getCurrentTimeAsString() {
 }
 bool Tester::createDirectory(const std::string& path) {
 	try {
-		//create_directories(path);
+		std::filesystem::create_directories(path);
 		return true;
 	}
 	catch (const std::exception& e) {
