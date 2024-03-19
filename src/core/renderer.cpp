@@ -345,7 +345,7 @@ void Renderer::setControlVariate()
 {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers[CONTROL_VARIATE].getID());
-	glBlitFramebuffer( 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glBlitFramebuffer( 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	//float* buffer = new float[width * height * 3];
 	//glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, buffer);
 	////for (int i = width * height; i < width * height * 3;i++) {
@@ -361,10 +361,10 @@ void Renderer::setControlVariate()
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//controlVariate.texture = texture;
-	//controlVariate.transferFunctionColor = transferFunctions[COLOR];
-	//controlVariate.tranferFunctionTransparency = transferFunctions[TRANSPARENCY];
-	//controlVariate.volumePosition = scene.getVolumePosition();
-	//isControlVariateSet = true;
+	controlVariate.transferFunctionColor = transferFunctions[COLOR];
+	controlVariate.tranferFunctionTransparency = transferFunctions[TRANSPARENCY];
+	controlVariate.volumePosition = scene.getVolumePosition();
+	isControlVariateSet = true;
 }
 
 void Renderer::setUseControlVariate(bool useIt)
