@@ -1,5 +1,6 @@
 #include <core/renderer.h>
 #include <string>;
+#include <vector>;
 
 #ifndef TESTER_H
 #define TESTER_H
@@ -10,15 +11,21 @@ public:
 		height(1080),
 		renderer(nullptr),
 		glfw_window(nullptr),
-		resultsFolder("C:/Users/Anton/Desktop/Results/") {
+		resultsFolder("X:/Anton/Projects/Programming/C/Volume-Rendering/results/") {
 		init();
 	};
 	void generateTestImages();
 private:
+	void runSingleTestcase(std::vector<float> transferFunction, int nrOfRendersteps,
+		Renderer::RenderMethods renderMethod, bool useControlVariate,
+		bool setControlVariate, bool saveImageToFile, std::string imageName);
 	void saveImage(std::string fileName);
 	void init();
 	std::string getCurrentTimeAsString();
 	bool createDirectory(const std::string& path);
+
+	void depricated();
+
 	int width, height;
 	Renderer* renderer;
 	GLFWwindow* glfw_window;

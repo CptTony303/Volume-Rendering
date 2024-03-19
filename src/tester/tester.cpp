@@ -14,6 +14,19 @@
 
 void Tester::generateTestImages() {
 
+	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, 1,
+		Renderer::MONTE_CARLO, false,
+		false, true, "x - 20s - no");
+	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, 6,
+		Renderer::MONTE_CARLO, false,
+		true, false, "x - 120s - no");
+	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, 1,
+		Renderer::MONTE_CARLO, true,
+		false, true, "x - 20s - yes");
+}
+
+void Tester::depricated() {
+
 	//renderer.setVolumeData(file_path);
 	renderer->setRenderMethod(Renderer::MONTE_CARLO);
 	renderer->setStepSize(0.001f);
@@ -71,8 +84,26 @@ void Tester::generateTestImages() {
 
 
 }
+void Tester::runSingleTestcase(std::vector<float> transferFunction, int nrOfRendersteps,
+		Renderer::RenderMethods renderMethod, bool useControlVariate,
+		bool setControlVariate, bool saveImageToFile, std::string imageName) {
+	renderer->resetAccumulatedFrames();
+	renderer->setTransferFunction(transferFunction, Renderer::COLOR);
+	renderer->setRenderMethod(renderMethod);
+	renderer->setUseControlVariate(useControlVariate);
 
-void Tester::saveImage(std::string fileName) 
+	for (int i = 0; i < nrOfRendersteps; i++) {
+		renderer->renderScene();
+	}
+
+	if (saveImageToFile) {
+		saveImage(imageName);
+	}
+	if (setControlVariate) {
+		renderer->setControlVariate();
+	}
+}
+void Tester::saveImage(std::string fileName)
 {
 	int* buffer = new int[width * height * 3];
 	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);

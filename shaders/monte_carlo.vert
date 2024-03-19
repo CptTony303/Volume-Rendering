@@ -16,6 +16,8 @@ void main()
 {
     // note that we read the multiplication from right to left
     gl_Position = projection * view * model * vec4(aPos, 1.0);
-    lastFrameCoord = vec2(gl_Position.x/screenSize_x,gl_Position.y/screenSize_y);
+    vec3 normalizedDeviceCoords = gl_Position.xyz / gl_Position.w;
+    normalizedDeviceCoords = 0.5 * (normalizedDeviceCoords + 1.0);
+    lastFrameCoord = normalizedDeviceCoords.xy;
     modelPos = aPos;
 }

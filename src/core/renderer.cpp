@@ -80,55 +80,44 @@ void Renderer::initVolumeShaders() // in renderer
 	//dynamic volume path and size
 	//Texture3D volumeData("C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/Assets/foot_256x256x256_uint8.raw", GL_TEXTURE3, glm::vec3(256, 256, 256));
 
-	const char* vertPathMonteCarlo = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/monte_carlo.vert";
-	const char* fragPathMonteCarlo = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/monte_carlo.frag";
+	const char* vertPathMonteCarlo = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/monte_carlo.vert";
+	const char* fragPathMonteCarlo = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/monte_carlo.frag";
 
 	shaders[MC] = Shader(vertPathMonteCarlo, fragPathMonteCarlo);
 	shaders[MC].use();
 
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_3D, scene.getVolumeData());
-	shaders[MC].setInt("volume", 4);
-	shaders[MC].setInt("convergedFrame", 5);
+	shaders[MC].setInt("volume", 0);
+	shaders[MC].setInt("convergedFrame", 1);
 
-	const char* vertPathRayMarch = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/volume.vert";
-	const char* fragPathRayMarch = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/ray_marching.frag";
+	const char* vertPathRayMarch = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/volume.vert";
+	const char* fragPathRayMarch = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/ray_marching.frag";
 
 	shaders[RM] = Shader(vertPathRayMarch, fragPathRayMarch);
 	shaders[RM].use();
 
-	shaders[RM].setInt("volume", 4);
+	shaders[RM].setInt("volume", 0);
 }
 void Renderer::initAccumulationShader() // in renderer
 {
-	const char* vertPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/copy.vert";
-	const char* fragPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/accumulation.frag";
+	const char* vertPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/copy.vert";
+	const char* fragPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/accumulation.frag";
 
 	shaders[ACC] = Shader(vertPath, fragPath);
 	shaders[ACC].use();
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture());
-
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, framebuffers[LAST_FRAME].getTexture());
-
-	shaders[ACC].setInt("screenTexture", 1);
-	shaders[ACC].setInt("screenCopy", 2);
+	shaders[ACC].setInt("screenTexture", 0);
+	shaders[ACC].setInt("screenCopy", 1);
 }
 
 void Renderer::initCopyShader() // in renderer
 {
-	const char* vertPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/copy.vert";
-	const char* fragPath = "C:/Users/Anton/Privat/Projects/Programming/Cpp/Volume-Rendering/shaders/copy.frag";
+	const char* vertPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/copy.vert";
+	const char* fragPath = "X:/Anton/Projects/Programming/C/Volume-Rendering/shaders/copy.frag";
 
 	shaders[COPY] = Shader(vertPath, fragPath);
 	shaders[COPY].use();
 
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, framebuffers[ACCUMULATION].getTexture());
-
-	shaders[COPY].setInt("screenTexture", 3);
+	shaders[COPY].setInt("screenTexture", 0);
 }
 
 void Renderer::initDebugShaders() // in renderer
@@ -151,6 +140,9 @@ void Renderer::updateShaderValues() // in renderer
 {
 	// hier am besten switch anweisung mit shader als enum
 	// dann nur notwendige shader updaten
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_3D, scene.getVolumeData());
+
 	switch (method) {
 	case RAY_MARCHING:
 		shaders[RM].use();
@@ -188,6 +180,10 @@ void Renderer::updateShaderValues() // in renderer
 		shaders[ACC].use();
 		shaders[ACC].setInt("runs", accumulatedFrames);
 		shaders[ACC].setInt("samplesPerRun", samplesPerFrame);
+
+		glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture());
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, controlVariate.texture);
 		break;
 		/*
 	case DEBUG:
@@ -260,6 +256,8 @@ void Renderer::renderVolume() // in renderer
 
 void Renderer::accumulateFrames()
 {
+
+
 	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(FrameVAO);
 
@@ -269,6 +267,12 @@ void Renderer::accumulateFrames()
 
 	shaders[ACC].use();
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture());
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, framebuffers[LAST_FRAME].getTexture());
+
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[LAST_FRAME].getID());
@@ -276,6 +280,10 @@ void Renderer::accumulateFrames()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	shaders[COPY].use();
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, framebuffers[ACCUMULATION].getTexture());
+
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -336,8 +344,12 @@ void Renderer::setControlVariate()
 {
 	int* buffer = new int[width * height * 3];
 	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+	/*for (int i = 0; i < width * height * 3; i++) {
+		std::cout << buffer[i];
+	}
+	std::cout << std::endl;*/
 	controlVariate.texture = Texture(width, height, buffer, GL_RGB).ID;
-	glActiveTexture(GL_TEXTURE5);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, controlVariate.texture);
 	controlVariate.transferFunctionColor = transferFunctions[COLOR];
 	controlVariate.tranferFunctionTransparency = transferFunctions[TRANSPARENCY];

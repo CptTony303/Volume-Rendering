@@ -24,7 +24,7 @@ public:
 		method(MONTE_CARLO),
 		accumulatedFrames(-1),
 		stepSize(0.1),
-		samplesPerFrame(5),
+		samplesPerFrame(20),
 		transferFunctions(2),
 		useControlVariate(false),
 		isControlVariateSet(false){
@@ -61,7 +61,7 @@ private:
 	void accumulateFrames();
 
 	struct ControlVariate {
-		int texture;
+		unsigned int texture;
 		std::vector <float> transferFunctionColor;
 		std::vector <float> tranferFunctionTransparency;
 		glm::mat4 volumePosition;

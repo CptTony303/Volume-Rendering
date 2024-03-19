@@ -183,5 +183,6 @@ void main(){
     FragColor = color/sample_nr;
     if(useControlVariate){
         FragColor.xyz += texture(convergedFrame, lastFrameCoord).rgb;
+        //FragColor.xy = lastFrameCoord;
     }
 }
