@@ -69,7 +69,7 @@ private:
 
 	int width, height;
 	VolumeScene scene;
-	enum FramebufferType {VOLUME, ACCUMULATION, LAST_FRAME};
+	enum FramebufferType {VOLUME, ACCUMULATION, LAST_FRAME, CONTROL_VARIATE};
 	enum ShaderType {MC, RM, COPY, ACC};
 	std::vector <Shader> shaders;
 	std::vector <Framebuffer> framebuffers;

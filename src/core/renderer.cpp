@@ -55,10 +55,11 @@ void Renderer::initFrameVAO() // soll in renderer
 }
 void Renderer::initFBOs() // belongs to renderer
 {
-	framebuffers.resize(3);
+	framebuffers.resize(4);
 	framebuffers[VOLUME] = Framebuffer(width, height);
 	framebuffers[ACCUMULATION] = Framebuffer(width, height);
 	framebuffers[LAST_FRAME] = Framebuffer(width, height);
+	framebuffers[CONTROL_VARIATE] = Framebuffer(width, height);
 }
 void Renderer::initTransferFunctions()
 {
@@ -183,7 +184,7 @@ void Renderer::updateShaderValues() // in renderer
 
 		glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture());
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, controlVariate.texture);
+		glBindTexture(GL_TEXTURE_2D, framebuffers[CONTROL_VARIATE].getTexture());
 		break;
 		/*
 	case DEBUG:
@@ -342,19 +343,28 @@ void Renderer::setStepSize(float stepSize)
 
 void Renderer::setControlVariate()
 {
-	int* buffer = new int[width * height * 3];
-	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
-	/*for (int i = 0; i < width * height * 3; i++) {
-		std::cout << buffer[i];
-	}
-	std::cout << std::endl;*/
-	controlVariate.texture = Texture(width, height, buffer, GL_RGB).ID;
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, controlVariate.texture);
-	controlVariate.transferFunctionColor = transferFunctions[COLOR];
-	controlVariate.tranferFunctionTransparency = transferFunctions[TRANSPARENCY];
-	controlVariate.volumePosition = scene.getVolumePosition();
-	isControlVariateSet = true;
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers[CONTROL_VARIATE].getID());
+	glBlitFramebuffer( 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	//float* buffer = new float[width * height * 3];
+	//glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, buffer);
+	////for (int i = width * height; i < width * height * 3;i++) {
+	////	std::cout << buffer[i] << " ";
+	////}
+	////std::cout << std::endl;
+	//unsigned int texture;
+	//glActiveTexture(GL_TEXTURE0);
+	//glGenTextures(1, &texture);
+	//glBindTexture(GL_TEXTURE_2D, texture);
+	////get actual screen size
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, buffer);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//controlVariate.texture = texture;
+	//controlVariate.transferFunctionColor = transferFunctions[COLOR];
+	//controlVariate.tranferFunctionTransparency = transferFunctions[TRANSPARENCY];
+	//controlVariate.volumePosition = scene.getVolumePosition();
+	//isControlVariateSet = true;
 }
 
 void Renderer::setUseControlVariate(bool useIt)
