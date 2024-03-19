@@ -23,21 +23,26 @@ void Tester::generateTestImages() {
 	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, 1,
 		Renderer::MONTE_CARLO, true,
 		false, true, "x - 20s - yes");
+
 	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, 1,
 		Renderer::MONTE_CARLO, false,
 		false, true, "y - 20s - no");
 	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, 1,
 		Renderer::MONTE_CARLO, true,
 		false, true, "y - 20s - yes");
-	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, 2,
-		Renderer::MONTE_CARLO, false,
-		false, true, "y - 40s - no");
-	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, 2,
-		Renderer::MONTE_CARLO, true,
-		false, true, "y - 40s - yes");
 	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, 6,
 		Renderer::MONTE_CARLO, false,
 		false, true, "y - 120s - no");
+
+	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, 1,
+		Renderer::MONTE_CARLO, false,
+		false, true, "z - 20s - no");
+	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, 1,
+		Renderer::MONTE_CARLO, true,
+		false, true, "z - 20s - yes");
+	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, 6,
+		Renderer::MONTE_CARLO, false,
+		false, true, "z - 120s - no");
 }
 
 void Tester::depricated() {
