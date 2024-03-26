@@ -1,13 +1,13 @@
-#include <core/window.h>
-#include <core/main.h>
-#include <core/renderer.h>
-#include <iostream>
-#include <glad/glad.h>
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+//#include <core/window.h>
+//#include <core/main.h>
+//#include <core/renderer.h>
+//#include <iostream>
+//#include <glad/glad.h>
+//#define GLFW_INCLUDE_NONE
+//#include <GLFW/glfw3.h>
+//#include <imgui.h>
+//#include <imgui_impl_glfw.h>
+//#include <imgui_impl_opengl3.h>
 /*
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
