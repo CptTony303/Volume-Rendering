@@ -81,11 +81,13 @@ void Tester::runSingleTestcase(std::vector<float> transferFunctionColor, std::ve
 	}
 
 	if (saveImageToFile) {
+		
 		saveImage(imageName);
 	}
 	if (setControlVariate) {
 		renderer->setControlVariate();
 	}
+	glfwSwapBuffers(glfw_window);
 }
 void Tester::saveImage(std::string fileName)
 {

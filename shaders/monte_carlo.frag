@@ -170,18 +170,19 @@ vec4 deltaTracking(vec3 w){
 
         vec3 texCoord = x+vec3(0.5f);
         float volumeData = texture(volume, texCoord).r;
-        float density = transferFunctionDensity(volumeData)*100;
-        float densityControl = transferFunctionControlDensity(volumeData)*100;
+        float density = transferFunctionDensity(volumeData)*mu;
+        float densityControl = transferFunctionControlDensity(volumeData)*mu;
         float mu_n = mu - density;
         float Pa = density / (density + abs(mu_n));
         float Pn = abs(mu_n)/(density + abs(mu_n));
         float mu_n_control = mu - densityControl;
         float Pa_control = densityControl / (densityControl + abs(mu_n_control));
         float Pn_control = abs(mu_n_control)/(densityControl + abs(mu_n_control));
-        color += weight * (density*transferFunctionColor(volumeData)/(mu*Pa));
-        colorControl += weightControl * (densityControl*transferFunctionControlColor(volumeData)/(mu*Pa_control));
-        
         if(rng2 < Pa || distance(x,modelPos) > 1.8){
+
+        color += transferFunctionColor(volumeData)*weight * (density/(mu*Pa));
+        colorControl += transferFunctionControlColor(volumeData) * weightControl * (densityControl / (mu * Pa_control));
+        
             //color /= float(counter);
             if(useControlVariate){
                 //colorControl *= 1.f/float(counter);
