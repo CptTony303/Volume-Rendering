@@ -13,47 +13,55 @@
 
 
 void Tester::generateTestImages() {
-	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0,1.0,1.0 }, 1,
-		Renderer::MONTE_CARLO, false,
-		false, true, "x - 20s - no");
-	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0,1.0,1.0 }, 6,
-		Renderer::MONTE_CARLO, false,
-		true, true, "x - 120s - no");
-	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0,1.0,1.0 }, 1,
-		Renderer::MONTE_CARLO, true,
-		false, true, "x - 20s - yes");
+	std::vector<float> x  = { 0.0,0.0,1.0,1.0 };
+	std::vector<float> y = { 0.0, 0.1, 1.0, 0.9 };
+	std::vector<float> z = { 0.0, 0.1, 1.0, 0.9 };
 
-	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, { 0.0,0.0,1.0,1.0 }, 1,
-		Renderer::MONTE_CARLO, false,
-		false, true, "y - 20s - no");
-	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, { 0.0,0.0,1.0,1.0 }, 1,
-		Renderer::MONTE_CARLO, true,
-		false, true, "y - 20s - yes");
-	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, { 0.0,0.0,1.0,1.0 }, 6,
-		Renderer::MONTE_CARLO, false,
-		false, true, "y - 120s - no");
+	std::vector<float> a = { 0.0,0.0, 0.07, 0.0 ,1.0,1.0 };
+	std::vector<float> b = { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 };
 
-	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, { 0.0,0.0,1.0,1.0 }, 1,
+	runSingleTestcase(x , a, 1,
 		Renderer::MONTE_CARLO, false,
-		false, true, "z - 20s - no");
-	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, { 0.0,0.0,1.0,1.0 }, 1,
+		false, true, "x - a - 20s - no");
+	runSingleTestcase(x, a, 6,
+		Renderer::MONTE_CARLO, false,
+		true, true, "x - a - 120s - no");
+	runSingleTestcase(x, a, 1,
 		Renderer::MONTE_CARLO, true,
-		false, true, "z - 20s - yes");
-	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, { 0.0,0.0,1.0,1.0 }, 6,
+		false, true, "x - a  - 20s - xa120");
+
+	runSingleTestcase(y, a, 1,
 		Renderer::MONTE_CARLO, false,
-		false, true, "z - 120s - no");
-	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 }, 1,
-		Renderer::MONTE_CARLO, false,
-		false, true, "x - changed Density - 20s - no");
-	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 }, 1,
+		false, true, "y - a  - 20s - no");
+	runSingleTestcase(y, a, 1,
 		Renderer::MONTE_CARLO, true,
-		false, true, "x - changed Density - 20s - yes");
-	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 }, 6,
+		false, true, "y - a  - 20s - xa120");
+	runSingleTestcase(y, a, 6,
 		Renderer::MONTE_CARLO, false,
-		true, true, "x - changed Density - 120s - no");
-	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0,1.0,1.0 }, 1,
+		false, true, "y - a  - 120s - xa120");
+
+	runSingleTestcase(z, a, 1,
+		Renderer::MONTE_CARLO, false,
+		false, true, "z - a  - 20s - xa120");
+	runSingleTestcase(z, a, 1,
 		Renderer::MONTE_CARLO, true,
-		false, true, "x - original Density - 20s - yes");
+		false, true, "z - a  - 20s - xa120");
+	runSingleTestcase(z, a, 6,
+		Renderer::MONTE_CARLO, false,
+		false, true, "z - a - 120s - xa120");
+
+	runSingleTestcase(x, b, 1,
+		Renderer::MONTE_CARLO, false,
+		false, true, "x - b - 20s - no");
+	runSingleTestcase(x, b, 1,
+		Renderer::MONTE_CARLO, true,
+		false, true, "x - b - 20s - xa120");
+	runSingleTestcase(x, b, 6,
+		Renderer::MONTE_CARLO, false,
+		true, true, "x - b - 120s - no");
+	runSingleTestcase(x, a, 1,
+		Renderer::MONTE_CARLO, true,
+		false, true, "x - a - 20s - xb120");
 }
 
 void Tester::depricated() {
