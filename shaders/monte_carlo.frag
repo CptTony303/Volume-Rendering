@@ -154,14 +154,14 @@ vec4 deltaTracking(vec3 w){
     int counter = 0;
     float weight = 1.f;
     float weightControl = 1.f;
-    vec3 color = vec3(0.f);
-    vec3 colorControl = vec3(0.f);
+    vec3 color;
+    vec3 colorControl;
     while(true){
 
 //        if(counter >= 500){
 //            return vec4(1.f, 0.f, 0.f, 1.0f);
 //        }
-        counter++;
+//        counter++;
         float rng1 = get_random_float();
         float rng2 = get_random_float();
 
@@ -170,27 +170,29 @@ vec4 deltaTracking(vec3 w){
 
         vec3 texCoord = x+vec3(0.5f);
         float volumeData = texture(volume, texCoord).r;
-        float density = transferFunctionDensity(volumeData)*mu;
-        float densityControl = transferFunctionControlDensity(volumeData)*mu;
+        float density = transferFunctionDensity(volumeData)*100;
+        float densityControl = transferFunctionControlDensity(volumeData)*100;
         float mu_n = mu - density;
         float Pa = density / (density + abs(mu_n));
         float Pn = abs(mu_n)/(density + abs(mu_n));
         float mu_n_control = mu - densityControl;
         float Pa_control = densityControl / (densityControl + abs(mu_n_control));
         float Pn_control = abs(mu_n_control)/(densityControl + abs(mu_n_control));
-        if(rng2 < Pa || distance(x,modelPos) > 1.8){
-
-        color += transferFunctionColor(volumeData)*weight * (density/(mu*Pa));
-        colorControl += transferFunctionControlColor(volumeData) * weightControl * (densityControl / (mu * Pa_control));
+        color = weight * (density*transferFunctionColor(volumeData)/(mu*Pa));
+        colorControl = weightControl * (densityControl*transferFunctionControlColor(volumeData)/(mu_n_control*Pa));
         
-            //color /= float(counter);
+        if(rng2 < Pa){
+            vec4 color = weight * (density*(vec4(transferFunctionColor(volumeData),1.f))/(mu*Pa));
             if(useControlVariate){
-                //colorControl *= 1.f/float(counter);
-                color -= colorControl;
+                color -= weightControl * (densityControl*(vec4(transferFunctionControlColor(volumeData), 1.f))/(mu*Pa_control));
             }
-            return vec4(color, 1.f);
+            return color;
         }
-
+        if(distance(x,modelPos) > 1.8){ //out of volume (1.8 ist längste diagonale eines Würfels)
+            return vec4(0.0f, 0.0f, 0.0f, 1.0f);
+                //return vec4(0.f,-1.f,-0.9f,1.f);
+                //return vec4(-weightControl * transferFunctionControlColor(volumeData), 1.f);
+        }
         weight = weight * mu_n/(mu*Pn);
         weightControl = weightControl * mu_n_control/(mu*Pn_control);
     }
