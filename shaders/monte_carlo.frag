@@ -150,7 +150,7 @@ vec3 transferFunctionControlColor(float value){
 
 vec4 deltaTracking(vec3 w){
     vec3 x = modelPos;
-    float mu = 100.f;
+    float mu = brightness;
     int counter = 0;
     float weight = 1.f;
     float weightControl = 1.f;

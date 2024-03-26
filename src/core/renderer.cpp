@@ -168,7 +168,7 @@ void Renderer::updateShaderValues() // in renderer
 
 		shaders[MC].setInt("samplesPerFrame", samplesPerFrame);
 		shaders[MC].setFloat("randomizer", (float)glfwGetTime());
-		shaders[MC].setFloat("brightness", 5.0);
+		shaders[MC].setFloat("brightness", 50.0);
 
 		shaders[MC].setInt("numberOfColorPoints", transferFunctions[COLOR].size() / 2);
 		shaders[MC].setListVec2("transfer_function_color", transferFunctions[COLOR]);

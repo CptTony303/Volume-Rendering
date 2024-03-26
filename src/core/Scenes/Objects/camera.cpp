@@ -11,7 +11,7 @@
 
 Camera::Camera(float imageRatio)
 {
-	glm::vec3 cam_pos = glm::vec3(-3.0f, 0.0f, 0.0f);
+	glm::vec3 cam_pos = glm::vec3(-1.9f, 0.0f, 0.0f);
 	glm::vec3 cam_view_dir = glm::vec3(1.f, 0.f, 0.f);
 	glm::vec3 cam_up_dir = glm::vec3(0.f, 1.f, 0.f);
 
