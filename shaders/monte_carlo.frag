@@ -15,7 +15,9 @@ uniform int numberOfDensityPoints;
 uniform vec2 transfer_function_density[100];
 
 uniform int lastNumberOfColorPoints;
-uniform vec2 transfer_function_control[100];
+uniform vec2 transfer_function_control_color[100];
+uniform int lastNumberOfDensityPoints;
+uniform vec2 transfer_function_control_density[100];
 uniform sampler2D convergedFrame;
 uniform bool useControlVariate;
 
@@ -77,6 +79,26 @@ float transferFunctionDensity(float value){
     }
     return 0; //should never reach this
 }
+float transferFunctionControlDensity(float value){
+    for(int i = 0; i < lastNumberOfDensityPoints; i++){
+        if(value<=transfer_function_control_density[i].x){
+            //check for out of bounds
+            if(i == 0){
+                return transfer_function_control_density[i].y;
+            }else{
+            //linear interpolation
+                float y0 = transfer_function_control_density[i-1].y;
+                float y1 = transfer_function_control_density[i].y;
+                float x0 = transfer_function_control_density[i-1].x;
+                float x1 = transfer_function_control_density[i].x;
+                float x = value;
+
+                return (y0*(x1-x)+y1*(x-x0))/(x1-x0);
+            }
+        }
+    }
+    return 0; //should never reach this
+}
 vec3 transferFunctionColor(float value){
     float color = -1;
     for(int i = 0; i < numberOfColorPoints; i++){
@@ -101,19 +123,19 @@ vec3 transferFunctionColor(float value){
     float blue = color < 0 ? color * -2.f : 0;;
     return vec3(red, green, blue);
 }
-vec3 transferFunctionControl(float value){
+vec3 transferFunctionControlColor(float value){
     float color = -1;
     for(int i = 0; i < lastNumberOfColorPoints; i++){
-        if(value<=transfer_function_control[i].x && color < 0){
+        if(value<=transfer_function_control_color[i].x && color < 0){
             //check for out of bounds
             if(i == 0){
-                value = transfer_function_control[i].y;
+                value = transfer_function_control_color[i].y;
             }else{
             //linear interpolation
-                float y0 = transfer_function_control[i-1].y;
-                float y1 = transfer_function_control[i].y;
-                float x0 = transfer_function_control[i-1].x;
-                float x1 = transfer_function_control[i].x;
+                float y0 = transfer_function_control_color[i-1].y;
+                float y1 = transfer_function_control_color[i].y;
+                float x0 = transfer_function_control_color[i-1].x;
+                float x1 = transfer_function_control_color[i].x;
                 float x = value;
                 color = (y0*(x1-x)+y1*(x-x0))/(x1-x0);
             }
@@ -128,12 +150,17 @@ vec3 transferFunctionControl(float value){
 
 vec4 deltaTracking(vec3 w){
     vec3 x = modelPos;
-    float mu = 10.f;
+    float mu = 100.f;
     int counter = 0;
+    float weight = 1.f;
+    float weightControl = 1.f;
+    vec3 color = vec3(0.f);
+    vec3 colorControl = vec3(0.f);
     while(true){
-        if(counter >= 500){
-            return vec4(1.f, 0.f, 0.f, 1.0f);
-        }
+
+//        if(counter >= 500){
+//            return vec4(1.f, 0.f, 0.f, 1.0f);
+//        }
         counter++;
         float rng1 = get_random_float();
         float rng2 = get_random_float();
@@ -143,18 +170,28 @@ vec4 deltaTracking(vec3 w){
 
         vec3 texCoord = x+vec3(0.5f);
         float volumeData = texture(volume, texCoord).r;
-        float density = transferFunctionDensity(volumeData)*brightness;
-
-        if(rng2 < density/mu){
-            vec4 color = vec4(transferFunctionColor(volumeData),1.f);
+        float density = transferFunctionDensity(volumeData)*100;
+        float densityControl = transferFunctionControlDensity(volumeData)*100;
+        float mu_n = mu - density;
+        float Pa = density / (density + abs(mu_n));
+        float Pn = abs(mu_n)/(density + abs(mu_n));
+        float mu_n_control = mu - densityControl;
+        float Pa_control = densityControl / (densityControl + abs(mu_n_control));
+        float Pn_control = abs(mu_n_control)/(densityControl + abs(mu_n_control));
+        color += weight * (density*transferFunctionColor(volumeData)/(mu*Pa));
+        colorControl += weightControl * (densityControl*transferFunctionControlColor(volumeData)/(mu*Pa_control));
+        
+        if(rng2 < Pa || distance(x,modelPos) > 1.8){
+            //color /= float(counter);
             if(useControlVariate){
-                color.xyz -= transferFunctionControl(volumeData);
+                //colorControl *= 1.f/float(counter);
+                color -= colorControl;
             }
-            return color;
+            return vec4(color, 1.f);
         }
-        if(distance(x,modelPos) > 1.8){ //out of volume (1.8 ist längste diagonale eines Würfels)
-            return vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        }
+
+        weight = weight * mu_n/(mu*Pn);
+        weightControl = weightControl * mu_n_control/(mu*Pn_control);
     }
 }
 
@@ -170,12 +207,9 @@ void main(){
     vec3 direction = normalize(modelPos - cameraPositionInModel);
 
     vec4 color = vec4(0.f);
-    //float eps = 1e-1;
     int sample_nr = 0;
-    //float change_rate = 1.f;
-    while(/*change_rate > eps */ sample_nr <samplesPerFrame){
+    while(sample_nr <samplesPerFrame){
         vec4 add_color = deltaTracking(direction);
-        //change_rate = distance(color/sample_nr, (color+add_color)/(sample_nr+1));
         sample_nr++;
         color += add_color;
     }
@@ -183,6 +217,5 @@ void main(){
     FragColor = color/sample_nr;
     if(useControlVariate){
         FragColor += texture(convergedFrame, lastFrameCoord);
-        //FragColor.xy = lastFrameCoord;
     }
 }

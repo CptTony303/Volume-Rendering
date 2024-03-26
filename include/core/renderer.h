@@ -63,7 +63,7 @@ private:
 	struct ControlVariate {
 		unsigned int texture;
 		std::vector <float> transferFunctionColor;
-		std::vector <float> tranferFunctionTransparency;
+		std::vector <float> transferFunctionDensity;
 		glm::mat4 volumePosition;
 	};
 

@@ -168,7 +168,7 @@ void Renderer::updateShaderValues() // in renderer
 
 		shaders[MC].setInt("samplesPerFrame", samplesPerFrame);
 		shaders[MC].setFloat("randomizer", (float)glfwGetTime());
-		shaders[MC].setFloat("brightness", 50.0);
+		shaders[MC].setFloat("brightness", 5.0);
 
 		shaders[MC].setInt("numberOfColorPoints", transferFunctions[COLOR].size() / 2);
 		shaders[MC].setListVec2("transfer_function_color", transferFunctions[COLOR]);
@@ -176,7 +176,9 @@ void Renderer::updateShaderValues() // in renderer
 		shaders[MC].setListVec2("transfer_function_density", transferFunctions[TRANSPARENCY]);
 
 		shaders[MC].setInt("lastNumberOfColorPoints", controlVariate.transferFunctionColor.size() / 2);
-		shaders[MC].setListVec2("transfer_function_control", controlVariate.transferFunctionColor);
+		shaders[MC].setListVec2("transfer_function_control_color", controlVariate.transferFunctionColor);
+		shaders[MC].setInt("lastNumberOfDensityPoints", controlVariate.transferFunctionDensity.size() / 2);
+		shaders[MC].setListVec2("transfer_function_control_density", controlVariate.transferFunctionDensity);
 		shaders[MC].setBool("useControlVariate", useControlVariate&&isControlVariateSet);
 
 		shaders[ACC].use();
@@ -363,7 +365,7 @@ void Renderer::setControlVariate()
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//controlVariate.texture = texture;
 	controlVariate.transferFunctionColor = transferFunctions[COLOR];
-	controlVariate.tranferFunctionTransparency = transferFunctions[TRANSPARENCY];
+	controlVariate.transferFunctionDensity = transferFunctions[TRANSPARENCY];
 	controlVariate.volumePosition = scene.getVolumePosition();
 	isControlVariateSet = true;
 }

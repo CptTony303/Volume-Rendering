@@ -13,36 +13,47 @@
 
 
 void Tester::generateTestImages() {
-
-	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, 1,
+	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0,1.0,1.0 }, 1,
 		Renderer::MONTE_CARLO, false,
 		false, true, "x - 20s - no");
-	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, 6,
+	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0,1.0,1.0 }, 6,
 		Renderer::MONTE_CARLO, false,
 		true, true, "x - 120s - no");
-	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, 1,
+	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0,1.0,1.0 }, 1,
 		Renderer::MONTE_CARLO, true,
 		false, true, "x - 20s - yes");
 
-	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, 1,
+	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, { 0.0,0.0,1.0,1.0 }, 1,
 		Renderer::MONTE_CARLO, false,
 		false, true, "y - 20s - no");
-	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, 1,
+	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, { 0.0,0.0,1.0,1.0 }, 1,
 		Renderer::MONTE_CARLO, true,
 		false, true, "y - 20s - yes");
-	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, 6,
+	runSingleTestcase({ 0.0,0.1,1.0,0.9 }, { 0.0,0.0,1.0,1.0 }, 6,
 		Renderer::MONTE_CARLO, false,
 		false, true, "y - 120s - no");
 
-	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, 1,
+	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, { 0.0,0.0,1.0,1.0 }, 1,
 		Renderer::MONTE_CARLO, false,
 		false, true, "z - 20s - no");
-	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, 1,
+	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, { 0.0,0.0,1.0,1.0 }, 1,
 		Renderer::MONTE_CARLO, true,
 		false, true, "z - 20s - yes");
-	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, 6,
+	runSingleTestcase({ 0.0,0.3,1.0,0.6 }, { 0.0,0.0,1.0,1.0 }, 6,
 		Renderer::MONTE_CARLO, false,
 		false, true, "z - 120s - no");
+	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 }, 1,
+		Renderer::MONTE_CARLO, false,
+		false, true, "x - changed Density - 20s - no");
+	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 }, 1,
+		Renderer::MONTE_CARLO, true,
+		false, true, "x - changed Density - 20s - yes");
+	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 }, 6,
+		Renderer::MONTE_CARLO, false,
+		true, true, "x - changed Density - 120s - no");
+	runSingleTestcase({ 0.0,0.0,1.0,1.0 }, { 0.0,0.0,1.0,1.0 }, 1,
+		Renderer::MONTE_CARLO, true,
+		false, true, "x - original Density - 20s - yes");
 }
 
 void Tester::depricated() {
@@ -56,11 +67,12 @@ void Tester::depricated() {
 	//renderer.setControlVariates(texture);
 
 }
-void Tester::runSingleTestcase(std::vector<float> transferFunction, int nrOfRendersteps,
+void Tester::runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity, int nrOfRendersteps,
 		Renderer::RenderMethods renderMethod, bool useControlVariate,
 		bool setControlVariate, bool saveImageToFile, std::string imageName) {
 	renderer->resetAccumulatedFrames();
-	renderer->setTransferFunction(transferFunction, Renderer::COLOR);
+	renderer->setTransferFunction(transferFunctionColor, Renderer::COLOR);
+	renderer->setTransferFunction(transferFunctionDensity, Renderer::TRANSPARENCY);
 	renderer->setRenderMethod(renderMethod);
 	renderer->setUseControlVariate(useControlVariate);
 

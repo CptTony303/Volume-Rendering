@@ -11,12 +11,12 @@ public:
 		height(1080),
 		renderer(nullptr),
 		glfw_window(nullptr),
-		resultsFolder("./results/") {
+		resultsFolder("./../results/") {
 		init();
 	};
 	void generateTestImages();
 private:
-	void runSingleTestcase(std::vector<float> transferFunction, int nrOfRendersteps,
+	void runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity, int nrOfRendersteps,
 		Renderer::RenderMethods renderMethod, bool useControlVariate,
 		bool setControlVariate, bool saveImageToFile, std::string imageName);
 	void saveImage(std::string fileName);
