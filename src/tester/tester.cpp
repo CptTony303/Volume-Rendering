@@ -74,6 +74,12 @@ void Tester::generateTestImages() {
 	runSingleTestcase(x, a, 1,
 		Renderer::MONTE_CARLO, true,
 		false, true, "x - a - 20s - xb120");
+
+	renderer->setVolumeData(Texture3D("./Assets/vis_male_128x256x256_uint8.raw",glm::vec3(128,256,256)));
+	renderer->setVolumePosition(m_1);
+	runSingleTestcase(x, a, 6,
+		Renderer::MONTE_CARLO, false,
+		false, true, "Head - x - a  - 120s - no");
 }
 
 void Tester::depricated() {

@@ -58,9 +58,9 @@ void Volume::initVAO()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 }
 
-void Volume::setData(char* pathToFile)
+void Volume::setData(Texture3D volumeData)
 {
-	data = Texture3D(pathToFile, glm::vec3(256)); //todo: interpreter for nhdr files -> remove dimensions
+	data = volumeData; //todo: interpreter for nhdr files -> remove dimensions
 }
 
 void Volume::setPosition(glm::mat4 modelMatrix)

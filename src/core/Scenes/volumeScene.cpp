@@ -16,8 +16,9 @@
 // die punkte sind die Objekte
 
 
-void VolumeScene::setVolumeData(char* path)
+void VolumeScene::setVolumeData(Texture3D volumeData)
 {
+	volume.setData(volumeData);
 }
 
 void VolumeScene::setVolumePosition(glm::mat4 modelMatrix)

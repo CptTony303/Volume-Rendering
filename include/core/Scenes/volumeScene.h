@@ -16,7 +16,7 @@ public:
 	VolumeScene(float imageRatio) : volume(Volume()),
 		camera(Camera(imageRatio)) {};
 
-	void setVolumeData(char* path);
+	void setVolumeData(Texture3D volumeData);
 	void setVolumePosition(glm::mat4 modelMatrix);
 
 	void setCameraPosition();

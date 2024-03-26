@@ -23,6 +23,10 @@ void Renderer::init() {
 	initShaders();
 	// in renderer 
 }
+void Renderer::setVolumeData(Texture3D volumeData)
+{
+	scene.setVolumeData(volumeData);
+}
 void Renderer::setVolumePosition(glm::mat4 modelMatrix)
 {
 	scene.setVolumePosition(modelMatrix);

@@ -19,7 +19,7 @@ public:
 	};
 	void initVAO();
 
-	void setData(char* pathToFile);
+	void setData(Texture3D volumeData);
 	void setPosition(glm::mat4 modelMatrix);
 
 	unsigned int getVAO();

@@ -33,7 +33,7 @@ public:
 	void renderVolume();
 	void init();
 
-	void setVolumeData();
+	void setVolumeData(Texture3D volumeData);
 	void setVolumePosition(glm::mat4 modelMatrix);
 	void setCameraPosition();
 	void setCameraOptions();
