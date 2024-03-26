@@ -3,6 +3,9 @@ project(VolumeRenderer)
 set(CMAKE_CXX_STANDARD 17) # Setze C++17 als die verwendete Version
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # Fordere die Verwendung der angegebenen C++-Version
 set(CMAKE_CXX_EXTENSIONS OFF) # Deaktiviere Compiler-Erweiterungen, die nicht Teil des Standards sind
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/out)
+# Erstelle den Ausgabeordner, falls er nicht existiert
+file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 
 include_directories(include)
