@@ -9,6 +9,7 @@
 #include <core/shader.h>
 #include <core/framebuffer.h>
 #include <vector>
+#include <core/texture3D.h>
 
 class Renderer
 {
@@ -21,6 +22,7 @@ public:
 		scene(VolumeScene(float(width) / float(height))),
 		shaders(4),
 		framebuffers(3),
+		FrameVAO(0),
 		method(MONTE_CARLO),
 		accumulatedFrames(-1),
 		stepSize(0.1),
@@ -35,7 +37,7 @@ public:
 
 	void setVolumeData(Texture3D volumeData);
 	void setVolumePosition(glm::mat4 modelMatrix);
-	void setCameraPosition();
+	void setCameraPosition(glm::mat4 viewMatrix);
 	void setCameraOptions();
 	void setRenderMethod(RenderMethods method);
 	void setTransferFunction(std::vector <float> transferFunction, TransferFunctionType type);
@@ -46,7 +48,9 @@ public:
 	void setUseControlVariate(bool useIt);
 	void resetAccumulatedFrames();
 
-	
+	glm::mat4 getCameraPosition();
+	glm::mat4 getVolumePosition();
+
 private:
 	void initFrameVAO();
 	void initFBOs();

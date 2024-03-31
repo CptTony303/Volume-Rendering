@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include <core/camera.h>
-#include <core/GUI/volumeGUI.h>
+#include <live-application/GUI/volumeGUI.h>
 #include <vector>
 #include <core/Objects/volume.h>
 
@@ -19,7 +19,7 @@ public:
 	void setVolumeData(Texture3D volumeData);
 	void setVolumePosition(glm::mat4 modelMatrix);
 
-	void setCameraPosition();
+	void setCameraPosition(glm::mat4 viewMatrix);
 	void setCameraRatio();
 	void setCameraAngle();
 

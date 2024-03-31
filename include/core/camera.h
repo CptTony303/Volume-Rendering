@@ -11,6 +11,7 @@ public:
 	Camera(float imageRatio);
 	glm::mat4 getViewMatrix();
 	glm::mat4 getProjectionMatrix();
+	void setViewMatrix(glm::mat4 viewMatrix);
 
 private:
 	void update_view();

@@ -1,4 +1,4 @@
-#include <core/GUI/volumeGUI.h>
+#include <live-application/GUI/volumeGUI.h>
 
 #include <imgui.h>
 #include <corecrt_math.h>
@@ -22,6 +22,26 @@ void VolumeGUI::renderGUI()
 		ImGui::EndTabBar();
 	}
 	ImGui::End();
+}
+
+std::vector<float> VolumeGUI::getTransferFunction(int type)
+{
+	std::vector<glm::vec2> points;
+	std::vector<float> transferFunction;
+	switch (type) {
+	case 0:
+		points = trans_func_points_color;
+		break;
+	case 1:
+		points = trans_func_points_density;
+		break;
+	}
+	for each (glm::vec2 p in points)
+	{
+		transferFunction.push_back(float(p.x));
+		transferFunction.push_back(float(p.y));
+	}
+	return transferFunction;
 }
 
 void VolumeGUI::renderMethodeTab()

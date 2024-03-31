@@ -9,7 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <core/camera.h>
-#include <core/GUI/volumeGUI.h>
+#include <live-application/GUI/volumeGUI.h>
 #include <vector>
 
 // Volume Scene bündelt eine Camera mit einem volume objekt. Es ist zu verstehen wie ein koordinatensystem mit punkten
@@ -26,8 +26,9 @@ void VolumeScene::setVolumePosition(glm::mat4 modelMatrix)
 	volume.setPosition(modelMatrix);
 }
 
-void VolumeScene::setCameraPosition()
+void VolumeScene::setCameraPosition(glm::mat4 viewMatrix)
 {
+	camera.setViewMatrix(viewMatrix);
 }
 
 void VolumeScene::setCameraRatio()

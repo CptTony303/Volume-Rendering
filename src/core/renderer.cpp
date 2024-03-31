@@ -31,6 +31,10 @@ void Renderer::setVolumePosition(glm::mat4 modelMatrix)
 {
 	scene.setVolumePosition(modelMatrix);
 }
+void Renderer::setCameraPosition(glm::mat4 viewMatrix)
+{
+	scene.setCameraPosition(viewMatrix);
+}
 void Renderer::initFrameVAO() // soll in renderer
 {
 
@@ -264,8 +268,6 @@ void Renderer::renderVolume() // in renderer
 
 void Renderer::accumulateFrames()
 {
-
-
 	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(FrameVAO);
 
@@ -309,38 +311,7 @@ void Renderer::setRenderMethod(RenderMethods method)
 
 void Renderer::setTransferFunction(std::vector <float> transferFunction, TransferFunctionType type)
 {
-	transferFunctions[type] = transferFunction; // Klappt evtl nicht wegen vs error
-	/*
-	trans_func_points_color.clear();
-	trans_func_points_color.resize(gui.trans_func_points_color.size() * 2);
-	for (int i = 0; i < gui.trans_func_points_color.size(); i++)
-	{
-		trans_func_points_color[i * 2] = gui.trans_func_points_color[i].x;
-		trans_func_points_color[i * 2 + 1] = gui.trans_func_points_color[i].y;
-	}
-	*/
-	/*
-		for (int i = 0; i < trans_func_points_color.size(); i++)
-		{
-			last_trans_func_points_color.push_back(trans_func_points_color[i]);
-		}
-		if (trans_func_points_color.size() != gui.trans_func_points_color.size() * 2) {
-			trans_func_points_color.clear();
-			trans_func_points_color.shrink_to_fit();
-			trans_func_points_color.resize(gui.trans_func_points_color.size() * 2);
-		}
-		for (int i = 0; i < gui.trans_func_points_color.size(); i++)
-		{
-			trans_func_points_color[i * 2] = gui.trans_func_points_color[i].x;
-			trans_func_points_color[i * 2 + 1] = gui.trans_func_points_color[i].y;
-		}
-	std::vector <float> trans_func_points_density;
-	for each (glm::vec2 p in gui.trans_func_points_density)
-	{
-		trans_func_points_density.push_back(p.x);
-		trans_func_points_density.push_back(p.y);
-	}
-	*/
+	transferFunctions[type] = transferFunction;
 }
 
 void Renderer::setStepSize(float stepSize)
@@ -353,21 +324,6 @@ void Renderer::setControlVariate()
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers[CONTROL_VARIATE].getID());
 	glBlitFramebuffer( 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	//float* buffer = new float[width * height * 3];
-	//glReadPixels(0, 0, width, height, GL_RGB, GL_FLOAT, buffer);
-	////for (int i = width * height; i < width * height * 3;i++) {
-	////	std::cout << buffer[i] << " ";
-	////}
-	////std::cout << std::endl;
-	//unsigned int texture;
-	//glActiveTexture(GL_TEXTURE0);
-	//glGenTextures(1, &texture);
-	//glBindTexture(GL_TEXTURE_2D, texture);
-	////get actual screen size
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_FLOAT, buffer);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//controlVariate.texture = texture;
 	controlVariate.transferFunctionColor = transferFunctions[COLOR];
 	controlVariate.transferFunctionDensity = transferFunctions[TRANSPARENCY];
 	controlVariate.volumePosition = scene.getVolumePosition();
@@ -382,4 +338,14 @@ void Renderer::setUseControlVariate(bool useIt)
 void Renderer::resetAccumulatedFrames()
 {
 	accumulatedFrames = -1;
+}
+
+glm::mat4 Renderer::getCameraPosition()
+{
+	return scene.getCameraView();
+}
+
+glm::mat4 Renderer::getVolumePosition()
+{
+	return scene.getVolumePosition();
 }

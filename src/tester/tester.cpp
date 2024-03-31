@@ -13,7 +13,6 @@
 
 
 void Tester::generateTestImages() {
-	renderer->setVolumePosition(glm::rotate(glm::mat4(1.f),glm::radians(0.f),glm::vec3(0.f,0.f,1.f)));
 	glm::mat4 m_0(1.f);
 	glm::mat4 m_1(glm::rotate(m_0, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
 
@@ -23,8 +22,14 @@ void Tester::generateTestImages() {
 
 	std::vector<float> a = { 0.0,0.0, 0.07, 0.0 ,1.0,1.0 };
 	std::vector<float> b = { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 };
+	std::vector<float> c = { 0.0,0.0, 0.3, 0.0,0.5,0.3 , 0.7, 0.0 , 1.0,1.0 };
+	std::vector<float> d = { 0.0,1.0, 1.0,1.0 };
 
 	renderer->setVolumePosition(m_1);
+
+	runSingleTestcase(x, d, 6,
+		Renderer::MONTE_CARLO, false,
+		true, true, "x - d - 120s - no - m_1");
 
 	runSingleTestcase(x, a, 6,
 		Renderer::MONTE_CARLO, false,
@@ -80,6 +85,12 @@ void Tester::generateTestImages() {
 	runSingleTestcase(x, a, 6,
 		Renderer::MONTE_CARLO, false,
 		false, true, "Head - x - a  - 120s - no");
+	runSingleTestcase(x, b, 6,
+		Renderer::MONTE_CARLO, false,
+		false, true, "Head - x - b  - 120s - no");
+	runSingleTestcase(x, c, 6,
+		Renderer::MONTE_CARLO, false,
+		false, true, "Head - x - c  - 120s - no");
 }
 
 void Tester::depricated() {

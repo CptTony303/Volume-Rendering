@@ -5,7 +5,6 @@
 #include <iostream>
 #include <glm/gtx/string_cast.hpp>
 #define GLFW_INCLUDE_NONE
-#include <core/window.h>
 #include <atomic>
 #include <mutex>
 
@@ -35,6 +34,10 @@ glm::mat4 Camera::getViewMatrix()
 glm::mat4 Camera::getProjectionMatrix()
 {
 	return projection;
+}
+void Camera::setViewMatrix(glm::mat4 viewMatrix)
+{
+	view = viewMatrix;
 }
 void Camera::update_view()
 {
