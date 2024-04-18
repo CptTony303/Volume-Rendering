@@ -10,8 +10,8 @@ class LiveApplication {
 public:
 	LiveApplication() :
 		renderer(nullptr),
-		width(1920),
-		height(1080),
+		width(2000),
+		height(1300),
 		glfw_window(nullptr){};
 	void start();
 

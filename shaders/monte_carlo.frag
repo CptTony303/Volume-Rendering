@@ -25,6 +25,13 @@ uniform float brightness;
 uniform int samplesPerFrame;
 uniform float randomizer;
 
+vec3 color_f1;
+vec3 color_h1;
+vec3 variance_f1;
+vec3 variance_h1;
+vec3 covarinace_f1_h1;
+
+
 /*BEGIN simple substitution for rng*/
 /// 1 out, 3 in
 float hash13(vec3 p3)
@@ -148,20 +155,28 @@ vec3 transferFunctionControlColor(float value){
     return vec3(red, green, blue);
 }
 
-vec4 deltaTracking(vec3 w){
+void deltaTracking(vec3 w){
     vec3 x = modelPos;
     float mu = brightness;
-    int counter = 0;
     float weight = 1.f;
     float weightControl = 1.f;
-    vec3 color = vec3(0.f);
-    vec3 colorControl = vec3(0.f);
-    while(true){
 
-//        if(counter >= 500){
-//            return vec4(1.f, 0.f, 0.f, 1.0f);
-//        }
-        counter++;
+    color_f1 = vec3(0.f);
+    color_h1 = vec3(0.f);
+    variance_f1 = vec3(0.f);
+    variance_h1 = vec3(0.f);
+    covarinace_f1_h1 = vec3(0.f);
+    vec3 mean_f1 = vec3(0.f);
+    vec3 mean_h1 = vec3(0.f);
+    float sumW = 0.f;
+    float sumV = 0.f;
+    float sumVW = 0.f;
+    vec3 M_f1 = vec3(0.f);
+    vec3 M_h1 = vec3(0.f);
+    int n = 0;
+
+    while(true){
+        n++;
         float rng1 = get_random_float();
         float rng2 = get_random_float();
 
@@ -171,31 +186,56 @@ vec4 deltaTracking(vec3 w){
         vec3 texCoord = x+vec3(0.5f);
         float volumeData = texture(volume, texCoord).r;
         float density = transferFunctionDensity(volumeData)*mu;
-        float densityControl = transferFunctionControlDensity(volumeData)*mu;
+        float densityControl = 0.f;
+        vec3 fi = transferFunctionColor(volumeData);
+        float wi = weight * (density / mu);
+
+        if(useControlVariate){
+        vec3 hi = transferFunctionControlColor(volumeData);
+        densityControl = transferFunctionControlDensity(volumeData)*mu;
+        float vi = weightControl * (densityControl/mu);
+        vec3 mean_f1_inc = mean_f1;
+        vec3 mean_h1_inc = mean_h1;
+        sumW += wi;
+        sumV += vi;
+        sumVW += vi*wi;
+
+        if(abs(sumW) > 0){
+            mean_f1_inc += wi*(fi - mean_f1)/sumW;
+        }
+        if(abs(sumV) > 0){
+            mean_h1_inc += vi * (hi - mean_h1) / sumV;
+        }
+        M_f1 += wi * (fi - mean_f1) * (fi - mean_f1_inc);
+        M_h1 += vi * (hi - mean_h1) * (hi - mean_h1_inc);
+
+        if(abs(sumVW) > 0){
+            covarinace_f1_h1 += wi*vi/sumVW * ((wi*fi - mean_f1_inc) * (vi*hi - mean_h1_inc) - covarinace_f1_h1);
+        }
+
+        mean_f1 = mean_f1_inc;
+        mean_h1 = mean_h1_inc;
+
+        color_h1 += vi * hi;
+        }
+        color_f1 += wi * fi;
+
+
         float mu_n = mu - density;
         float Pa = density / (density + abs(mu_n));
-        float Pn = abs(mu_n)/(density + abs(mu_n));
-        float mu_n_control = mu - densityControl;
-        float Pa_control = densityControl / (densityControl + abs(mu_n_control));
-        float Pn_control = abs(mu_n_control)/(densityControl + abs(mu_n_control));
-        if(Pa > 0.f){
-            color += weight * density * transferFunctionColor(volumeData) / (mu*Pa);
-            color /= 2.f;
-        }
-        if(Pa_control > 0.f){
-            colorControl += weightControl * densityControl*transferFunctionControlColor(volumeData)/(mu*Pa_control);
-            colorControl /= 2;
-        }
         if(rng2 < Pa || distance(x,modelPos) > 1.8){
-//            color /= float(counter);
             if(useControlVariate){
-//                colorControl /= float(counter);
-                color -= colorControl;
+            variance_f1 = M_f1 / sumW;
+            variance_h1 = M_h1 / sumV;
             }
-            return vec4(color,1.f);
+            return;
         }
+        float Pn = abs(mu_n)/(density + abs(mu_n));
         weight = abs( weight * mu_n/(mu*Pn));
-        weightControl = weightControl * mu_n_control/(mu*Pn_control);
+        if(useControlVariate){
+        float mu_n_control = mu - densityControl;
+        weightControl = weightControl * mu_n_control/(mu*Pn);
+        }
     }
 }
 
@@ -210,16 +250,49 @@ void main(){
     vec3 cameraPositionInModel = vec3(inverseModel * vec4(cameraPosition,1.f) ); //eine von beiden Mult wird schon passen---> kamearapos in Modll space  
     vec3 direction = normalize(modelPos - cameraPositionInModel);
 
-    vec4 color = vec4(0.f);
+    vec3 f1 = vec3(0.f);
+    vec3 h1 = vec3(0.f);
+    vec3 var_f1 = vec3(0.f);
+    vec3 var_h1 = vec3(0.f);
+    vec3 cov_f1_h1 = vec3(0.f);
     int sample_nr = 0;
     while(sample_nr <samplesPerFrame){
-        vec4 add_color = deltaTracking(direction);
+        deltaTracking(direction);
         sample_nr++;
-        color += add_color;
+        f1 += color_f1;
+        if(useControlVariate){
+            h1 += color_h1;
+            var_f1 += variance_f1;
+            var_h1 += variance_h1;
+            cov_f1_h1 += covarinace_f1_h1;
+        }
     }
-
-    FragColor = color/sample_nr;
+    f1 /= samplesPerFrame;
+    FragColor = vec4(f1,1.f);
     if(useControlVariate){
-        FragColor += texture(convergedFrame, lastFrameCoord);
+        vec3 h0 = texture(convergedFrame, lastFrameCoord).rgb;
+        h1 /= samplesPerFrame;
+        var_f1 /= samplesPerFrame;
+        var_h1 /= samplesPerFrame;
+        cov_f1_h1 /= samplesPerFrame;
+
+        vec3 f_star = f1 - h1 + h0;
+       
+        vec3 var_f_star = var_f1 + var_h1 - 2 * cov_f1_h1;
+        vec3 cov_f_star_f1 = var_f1 - cov_f1_h1;
+
+        mat2 covMat_f1_f_star_x_inverse = inverse(mat2(var_f1.x, cov_f_star_f1.x, cov_f_star_f1.x, var_f_star.x));
+        mat2 covMat_f1_f_star_y_inverse = inverse(mat2(var_f1.y, cov_f_star_f1.y, cov_f_star_f1.y, var_f_star.y));
+        mat2 covMat_f1_f_star_z_inverse = inverse(mat2(var_f1.z, cov_f_star_f1.z, cov_f_star_f1.z, var_f_star.z));
+
+        vec2 e = vec2(1.0);
+        vec2 weights_x = (e * covMat_f1_f_star_x_inverse) / dot(e * covMat_f1_f_star_x_inverse, e);
+        vec2 weights_y = (e * covMat_f1_f_star_y_inverse) / dot(e * covMat_f1_f_star_y_inverse, e);
+        vec2 weights_z = (e * covMat_f1_f_star_z_inverse) / dot(e * covMat_f1_f_star_z_inverse, e);
+        vec3 weight_f1 = vec3(weights_x.x,weights_y.x,weights_z.x);
+        vec3 weight_f_star = vec3(weights_x.y,weights_y.y,weights_z.y);
+        vec3 F = weight_f1 * f1 + weight_f_star * f_star;
+
+        FragColor = vec4(F, 1.f);
     }
 }
