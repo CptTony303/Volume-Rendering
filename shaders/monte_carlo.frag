@@ -29,7 +29,7 @@ vec3 color_f1;
 vec3 color_h1;
 vec3 variance_f1;
 vec3 variance_h1;
-vec3 covarinace_f1_h1;
+vec3 covariance_f1_h1;
 
 
 /*BEGIN simple substitution for rng*/
@@ -165,7 +165,8 @@ void deltaTracking(vec3 w){
     color_h1 = vec3(0.f);
     variance_f1 = vec3(0.f);
     variance_h1 = vec3(0.f);
-    covarinace_f1_h1 = vec3(0.f);
+    covariance_f1_h1 = vec3(0.f);
+    vec3 color_f1h1 = vec3(0.f);
     vec3 mean_f1 = vec3(0.f);
     vec3 mean_h1 = vec3(0.f);
     float sumW = 0.f;
@@ -210,31 +211,35 @@ void deltaTracking(vec3 w){
         M_h1 += vi * (hi - mean_h1) * (hi - mean_h1_inc);
 
         if(abs(sumVW) > 0){
-            covarinace_f1_h1 += wi*vi/sumVW * ((wi*fi - mean_f1_inc) * (vi*hi - mean_h1_inc) - covarinace_f1_h1);
+            covariance_f1_h1 += wi*vi/sumVW * ((fi - mean_f1_inc) * (hi - mean_h1_inc) - covariance_f1_h1);
         }
 
         mean_f1 = mean_f1_inc;
         mean_h1 = mean_h1_inc;
 
         color_h1 += vi * hi;
+        color_f1h1 += vi*wi*fi*hi;
         }
         color_f1 += wi * fi;
 
 
         float mu_n = mu - density;
         float Pa = density / (density + abs(mu_n));
+        float Pn = abs(mu_n)/(density + abs(mu_n));
+        weight = abs( weight * mu_n/(mu));
         if(rng2 < Pa || distance(x,modelPos) > 1.8){
             if(useControlVariate){
+//            color_h1 /= sumV;
             variance_f1 = M_f1 / sumW;
             variance_h1 = M_h1 / sumV;
+//            covariance_f1_h1 = color_f1h1 - color_f1 * color_h1;
             }
+//            color_f1 /= sumW;
             return;
         }
-        float Pn = abs(mu_n)/(density + abs(mu_n));
-        weight = abs( weight * mu_n/(mu*Pn));
         if(useControlVariate){
         float mu_n_control = mu - densityControl;
-        weightControl = weightControl * mu_n_control/(mu*Pn);
+        weightControl = weightControl * mu_n_control/(mu);
         }
     }
 }
@@ -264,7 +269,7 @@ void main(){
             h1 += color_h1;
             var_f1 += variance_f1;
             var_h1 += variance_h1;
-            cov_f1_h1 += covarinace_f1_h1;
+            cov_f1_h1 += covariance_f1_h1;
         }
     }
     f1 /= samplesPerFrame;
@@ -293,6 +298,9 @@ void main(){
         vec3 weight_f_star = vec3(weights_x.y,weights_y.y,weights_z.y);
         vec3 F = weight_f1 * f1 + weight_f_star * f_star;
 
-        FragColor = vec4(F, 1.f);
+        FragColor = clamp(vec4(F, 1.f), 0.0, 1.0);
+        return;
+
+        FragColor = vec4(cov_f_star_f1.x, cov_f_star_f1.y,cov_f_star_f1.z,0.01)*100;
     }
 }

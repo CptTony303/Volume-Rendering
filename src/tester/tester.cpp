@@ -14,15 +14,15 @@
 
 void Tester::generateTestImages() {
 	glm::mat4 m_0(1.f);
-	glm::mat4 m_1(glm::rotate(m_0, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
+	//glm::mat4 m_1(glm::rotate(m_0, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
 
 	std::vector<float> x  = { 0.0,0.0,1.0,1.0 };
 	std::vector<float> y = { 0.0, 0.1, 1.0, 0.9 };
-	std::vector<float> z = { 0.0, 0.1, 1.0, 0.9 };
+	//std::vector<float> z = { 0.0, 0.1, 1.0, 0.9 };
 
 	std::vector<float> a = { 0.0,0.0, 0.07, 0.0 ,1.0,1.0 };
 	std::vector<float> b = { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 };
-	std::vector<float> c = { 0.0,0.0, 0.3, 0.0,0.5,0.3 , 0.7, 0.0 , 1.0,1.0 };
+	//std::vector<float> c = { 0.0,0.0, 0.3, 0.0,0.5,0.3 , 0.7, 0.0 , 1.0,1.0 };
 
 
 	renderer->setVolumePosition(m_0);
@@ -47,15 +47,15 @@ void Tester::generateTestImages() {
 		Renderer::MONTE_CARLO, false,
 		false, true, "y - a  - 120s - no");
 
-	runSingleTestcase(z, a, 1,
-		Renderer::MONTE_CARLO, false,
-		false, true, "z - a  - 20s - no");
-	runSingleTestcase(z, a, 1,
-		Renderer::MONTE_CARLO, true,
-		false, true, "z - a  - 20s - xa120");
-	runSingleTestcase(z, a, 6,
-		Renderer::MONTE_CARLO, false,
-		false, true, "z - a - 120s - xa120");
+	//runSingleTestcase(z, a, 1,
+	//	Renderer::MONTE_CARLO, false,
+	//	false, true, "z - a  - 20s - no");
+	//runSingleTestcase(z, a, 1,
+	//	Renderer::MONTE_CARLO, true,
+	//	false, true, "z - a  - 20s - xa120");
+	//runSingleTestcase(z, a, 6,
+	//	Renderer::MONTE_CARLO, false,
+	//	false, true, "z - a - 120s - no");
 
 	runSingleTestcase(x, b, 1,
 		Renderer::MONTE_CARLO, false,
@@ -70,17 +70,17 @@ void Tester::generateTestImages() {
 		Renderer::MONTE_CARLO, true,
 		false, true, "x - a - 20s - xb120");
 
-	renderer->setVolumeData(Texture3D("./Assets/vis_male_128x256x256_uint8.raw",glm::vec3(128,256,256)));
-	renderer->setVolumePosition(m_1);
-	runSingleTestcase(x, a, 6,
-		Renderer::MONTE_CARLO, false,
-		false, true, "Head - x - a  - 120s - no");
-	runSingleTestcase(x, b, 6,
-		Renderer::MONTE_CARLO, false,
-		false, true, "Head - x - b  - 120s - no");
-	runSingleTestcase(x, c, 6,
-		Renderer::MONTE_CARLO, false,
-		false, true, "Head - x - c  - 120s - no");
+	//renderer->setVolumeData(Texture3D("./Assets/vis_male_128x256x256_uint8.raw",glm::vec3(128,256,256)));
+	//renderer->setVolumePosition(m_1);
+	//runSingleTestcase(x, a, 6,
+	//	Renderer::MONTE_CARLO, false,
+	//	false, true, "Head - x - a  - 120s - no");
+	//runSingleTestcase(x, b, 6,
+	//	Renderer::MONTE_CARLO, false,
+	//	false, true, "Head - x - b  - 120s - no");
+	//runSingleTestcase(x, c, 6,
+	//	Renderer::MONTE_CARLO, false,
+	//	false, true, "Head - x - c  - 120s - no");
 }
 
 void Tester::depricated() {
