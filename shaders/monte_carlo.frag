@@ -160,6 +160,7 @@ vec3 transferFunctionControlColor(float value){
 void deltaTracking(vec3 w){
     int samplesPerDeltaStep = 10;
     float minimum_percentage = 0.9;
+    float lower_precision_treshold = 0.5;
     int n = 0;
 
     vec3 x = modelPos;
@@ -213,6 +214,9 @@ void deltaTracking(vec3 w){
     }
     color_f1 /= sumW;
     color_h1 /= sumV;
+    if(sumV < lower_precision_treshold){
+        color_h1 = vec3(0.f);
+    }
 }
 
 
@@ -298,42 +302,52 @@ void main(){
         float eps = 0.00001;
 
         vec2 weights = (e * covMat_f1_f_star_inverse) / dot(e * covMat_f1_f_star_inverse, e);
-        F = weights.x * f1 + weights.y * f_star;
+        if (abs(dot(var_f_star, e3)) < eps || abs(dot(var_f_star, e3)) < eps){
+            weights = vec2(0.5);
+        }
 
         vec2 weights_x = (e * covMat_f1_f_star_x_inverse) / dot(e * covMat_f1_f_star_x_inverse, e);
-        if (var_f_star.x < eps || var_f1.x < eps){
+        if (abs(var_f_star.x) < eps || abs(var_f1.x) < eps){
             weights_x = vec2(0.5);
         }
-//        if (abs(f_star.x - f1.x) < eps){
-//            weights_x = vec2(1.f, 0.f);
-//        }
+        if (abs(f_star.x) < eps){
+            weights_x = vec2(1.f, 0.f);
+        }
 
         vec2 weights_y = (e * covMat_f1_f_star_y_inverse) / dot(e * covMat_f1_f_star_y_inverse, e);
-        if (var_f_star.y < eps || var_f1.y < eps){
+        if (abs(var_f_star.y) < eps || abs(var_f1.y) < eps){
             weights_y = vec2(0.5);
         }
-//        if (abs(f_star.y - f1.y) < eps){
-//            weights_y = vec2(1.f, 0.f);
-//        }
+        if (abs(f_star.y) < eps){
+            weights_y = vec2(1.f, 0.f);
+        }
 
         vec2 weights_z = (e * covMat_f1_f_star_z_inverse) / dot(e * covMat_f1_f_star_z_inverse, e);
-        if (var_f_star.z < eps || var_f1.z < eps){
+        if (abs(var_f_star.z) < eps || abs(var_f1.z) < eps){
             weights_z = vec2(0.5);
         }
-//        if (abs(var_f_star.z - var_f1.z) < eps){
-//            weights_z = vec2(0.5f);
-//        }
+        if (abs(f_star.z) < eps){
+            weights_z = vec2(1.f,0.f);
+        }
 
         vec3 weight_f1 = vec3(weights_x.x,weights_y.x,weights_z.x);
         vec3 weight_f_star = vec3(weights_x.y,weights_y.y,weights_z.y);
 
+//        F = weights.x * f1 + weights.y * f_star;
         F = weight_f1 * f1 + weight_f_star * f_star;
-
 //        F = (weight_f1 + e3 * weights.x )/2  * f1 + (weight_f_star + e3 * weights.y )/2 * f_star;
 
         FragColor = clamp(vec4(F, 1.f), 0.0, 1.0);
         return;
+
+        FragColor = vec4(f1,1.f);
+        FragColor = vec4(h1,1.f);
+        FragColor = vec4(f1_h1,1.f);
 //        FragColor = vec4(f_star,1.f);
+//        FragColor = vec4(var_f1,1.f);
+//        FragColor = vec4(var_f_star,1.f);
+//        FragColor = vec4(cov_f_star_f1,1.f);
+
 //        FragColor = vec4(dot(cov_f1_h1, e3)/3.f*100,0,0,1);
 //        FragColor = vec4(weights.x,0,0,1);
 //        FragColor = vec4(weights.y,0,0,1);
