@@ -156,7 +156,7 @@ vec3 transferFunctionControlColor(float value){
 }
 
 void deltaTracking(vec3 w){
-//    int samplesPerDeltaStep = 30;
+    int samplesPerDeltaStep = 10;
     float minimum_percentage = 0.9;
     int n = 0;
 
@@ -224,14 +224,25 @@ void main(){
     vec3 cameraPositionInModel = vec3(inverseModel * vec4(cameraPosition,1.f) ); //eine von beiden Mult wird schon passen---> kamearapos in Modll space  
     vec3 direction = normalize(modelPos - cameraPositionInModel);
 
+    vec3 h0 = vec3(0.f);
     vec3 f1 = vec3(0.f);
     vec3 h1 = vec3(0.f);
     vec3 f1_h1 = vec3(0.f);
+    vec3 f_star = vec3(0.f);
+
     vec3 var_f1 = vec3(0.f);
     vec3 var_h1 = vec3(0.f);
     vec3 var_f1_h1 = vec3(0.f);
-//    vec3 cov_f1_h1 = vec3(0.f);
-//    vec3 cov_f1_f_star = vec3(0.f);
+    vec3 var_f_star = vec3(0.f);
+
+    vec3 cov_f1_h1 = vec3(0.f);
+    vec3 cov_f1_f_star = vec3(0.f);
+    
+
+    if(useControlVariate){
+        h0 = texture(convergedFrame, lastFrameCoord).rgb;
+    }
+
     int sample_nr = 0;
     while(sample_nr <samplesPerFrame){
         deltaTracking(direction);
@@ -240,32 +251,37 @@ void main(){
         if(useControlVariate){
             h1 += color_h1;
             f1_h1 += color_f1 - color_h1;
+            f_star += color_f1 - color_h1 + h0;
             if(sample_nr>=2){
                 var_f1 += (color_f1 - f1/float(sample_nr)) * (color_f1 - (f1-color_f1)/float(sample_nr-1));
                 var_h1 += (color_h1 - h1/float(sample_nr)) * (color_h1 - (h1-color_h1)/float(sample_nr-1));
                 var_f1_h1 += (color_f1 - color_h1 - f1_h1/float(sample_nr)) 
                             *(color_f1 - color_h1 - (f1_h1-(color_f1 - color_h1))/float(sample_nr-1));
-//                cov_f1_h1 = (sample_nr-1)/sample_nr * cov_f1_h1 
-//                              + 1/(sample_nr-1) * (color_f1 - f1/float(sample_nr)) * (color_h1 - h1/float(sample_nr));
-//                cov_f1_f_star = (sample_nr-1)/sample_nr * cov_f1_f_star
-//                                + 1/(sample_nr-1) * (color_f1 - f1/float(sample_nr)) * (color_f1 - color_h1 - f1_h1/float(sample_nr));
+                var_f_star += (color_f1 - color_h1 + h0 - f_star/float(sample_nr)) 
+                            *(color_f1 - color_h1 + h0 - (f_star-(color_f1 - color_h1 + h0))/float(sample_nr-1));
+
+                cov_f1_h1 = (sample_nr-1)/sample_nr * cov_f1_h1 
+                              + 1/(sample_nr-1) * (color_f1 - f1/float(sample_nr)) * (color_h1 - h1/float(sample_nr));
+                cov_f1_f_star = (sample_nr-1)/sample_nr * cov_f1_f_star
+                                + 1/(sample_nr-1) * (color_f1 - f1/float(sample_nr)) * (color_f1 - color_h1 + h0 - f_star/float(sample_nr));
             }
         }
     }
     f1 /= samplesPerFrame;
     FragColor = vec4(f1,1.f);
     if(useControlVariate){
-        vec3 h0 = texture(convergedFrame, lastFrameCoord).rgb;
         h1 /= samplesPerFrame;
         f1_h1 /= samplesPerFrame;
+        f_star /= samplesPerFrame;
         var_f1 /= samplesPerFrame - 1;
         var_h1 /= samplesPerFrame - 1;
         var_f1_h1 /= samplesPerFrame - 1;
 
-        vec3 f_star = f1_h1 + h0;
-        vec3 var_f_star = var_f1_h1;
-        vec3 cov_f1_h1 = (var_f1 + var_h1 - var_f1_h1)/2;
-        vec3 cov_f_star_f1 = var_f1 - cov_f1_h1;
+//        f_star = f1_h1 + h0;
+//        vec3 var_f_star = var_f1_h1;
+//        vec3 cov_f1_h1 = (var_f1 + var_h1 - var_f1_h1)/2;
+//        vec3 cov_f_star_f1 = var_f1 - cov_f1_h1;
+        vec3 cov_f_star_f1 = cov_f1_f_star;
 
         vec3 e3 = vec3(1.f);
         mat2 covMat_f1_f_star_inverse = inverse(mat2(dot(var_f1, e3)/3.f, dot(cov_f_star_f1, e3)/3.f, 
