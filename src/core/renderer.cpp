@@ -322,8 +322,20 @@ void Renderer::setStepSize(float stepSize)
 
 void Renderer::setControlVariate()
 {
+	glDisable(GL_DEPTH_TEST);
+	glBindVertexArray(FrameVAO);
+
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers[CONTROL_VARIATE].getID());
-	glBlitFramebuffer( 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	shaders[COPY].use();
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, framebuffers[ACCUMULATION].getTexture());
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
 	controlVariate.transferFunctionColor = transferFunctions[COLOR];
 	controlVariate.transferFunctionDensity = transferFunctions[TRANSPARENCY];
 	controlVariate.volumePosition = scene.getVolumePosition();

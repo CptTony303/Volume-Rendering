@@ -292,16 +292,35 @@ void main(){
 
         vec3 F;
         vec2 e = vec2(1.0);
+        float eps = 0.00001;
 
         vec2 weights = (e * covMat_f1_f_star_inverse) / dot(e * covMat_f1_f_star_inverse, e);
         F = weights.x * f1 + weights.y * f_star;
 
         vec2 weights_x = (e * covMat_f1_f_star_x_inverse) / dot(e * covMat_f1_f_star_x_inverse, e);
+        if (var_f_star.x < eps || var_f1.x < eps){
+            weights_x = vec2(0.5);
+        }
+//        if (cov_f_star_f1.x < eps){
+//            weights_x = vec2(0.5);
+//        }
         vec2 weights_y = (e * covMat_f1_f_star_y_inverse) / dot(e * covMat_f1_f_star_y_inverse, e);
+        if (var_f_star.y < eps || var_f1.y < eps){
+            weights_y = vec2(0.5);
+        }
+//        if (cov_f_star_f1.y < eps){
+//            weights_y = vec2(0.5);
+//        }
         vec2 weights_z = (e * covMat_f1_f_star_z_inverse) / dot(e * covMat_f1_f_star_z_inverse, e);
+        if (var_f_star.z < eps || var_f1.z < eps){
+            weights_z = vec2(0.5);
+        }
+//        if (cov_f_star_f1.z < eps){
+//            weights_z = vec2(0.5);
+//        }
         vec3 weight_f1 = vec3(weights_x.x,weights_y.x,weights_z.x);
         vec3 weight_f_star = vec3(weights_x.y,weights_y.y,weights_z.y);
-//        F = weight_f1 * f1 + weight_f_star * f_star;
+        F = weight_f1 * f1 + weight_f_star * f_star;
 
 //        F = (weight_f1 + e3 * weights.x )/2  * f1 + (weight_f_star + e3 * weights.y )/2 * f_star;
 
