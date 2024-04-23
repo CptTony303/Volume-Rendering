@@ -24,7 +24,6 @@ private:
 	std::string getCurrentTimeAsString();
 	bool createDirectory(const std::string& path);
 
-	void depricated();
 
 	int width, height;
 	Renderer* renderer;

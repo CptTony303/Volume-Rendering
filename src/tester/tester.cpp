@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <filesystem>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "../../lib/glfw/deps/stb_image_write.h"
+#include <GLFW/stb_image_write.h>
 
 
 void Tester::generateTestImages() {
@@ -83,17 +83,6 @@ void Tester::generateTestImages() {
 	//	false, true, "Head - x - c  - 120s - no");
 }
 
-void Tester::depricated() {
-
-	//renderer.setVolumeData(file_path);
-	renderer->setRenderMethod(Renderer::MONTE_CARLO);
-	renderer->setStepSize(0.001f);
-	//renderer.setCameraView(glm::mat4);
-	//renderer.setCameraOptions();
-	//renderer.setTransferFunctions(vector<float>);
-	//renderer.setControlVariates(texture);
-
-}
 void Tester::runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity, int nrOfRendersteps,
 		Renderer::RenderMethods renderMethod, bool useControlVariate,
 		bool setControlVariate, bool saveImageToFile, std::string imageName) {

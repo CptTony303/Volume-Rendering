@@ -10,6 +10,7 @@
 #include <imgui_impl_opengl3.h>
 #include <live-application/GUI/volumeGUI.h>
 #include <live-application/controller.h>
+#include <tester/tester.h>
 
 //Window* Window::window = NULL;
 //Window::Window() {
@@ -112,12 +113,21 @@ void LiveApplication::start()
 		gui.reset_accumulation_frames = false;
 		renderer->setTransferFunction(gui.getTransferFunction(0), Renderer::COLOR);
 		renderer->setTransferFunction(gui.getTransferFunction(1), Renderer::TRANSPARENCY);
-		renderer->renderScene();
 
-		if (false) {
+		if (gui.set_control_variate) {
 			renderer->setControlVariate();
 		}
+		if (gui.delete_control_variate) {
+			renderer->deleteControlVariate();
+		}
+		renderer->setUseControlVariate(gui.use_control_variate);
+		if (gui.run_test_cases) {
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
+			break;
+		}
 
+		renderer->renderScene();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -127,6 +137,9 @@ void LiveApplication::start()
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 	glfwTerminate();
+	if (gui.run_test_cases) {
+		Tester();
+	}
 }
 //void Window::processInput(GLFWwindow* window)
 //{

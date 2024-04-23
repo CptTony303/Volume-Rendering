@@ -26,7 +26,7 @@ public:
 		method(MONTE_CARLO),
 		accumulatedFrames(-1),
 		stepSize(0.1),
-		samplesPerFrame(20),
+		samplesPerFrame(10),
 		transferFunctions(2),
 		useControlVariate(false),
 		isControlVariateSet(false){
@@ -45,11 +45,14 @@ public:
 	void setStepSize(float stepSize);
 	void setSampleSize();
 	void setControlVariate();
+	void deleteControlVariate();
 	void setUseControlVariate(bool useIt);
 	void resetAccumulatedFrames();
 
 	glm::mat4 getCameraPosition();
 	glm::mat4 getVolumePosition();
+
+	void saveImageToFile(std::string fileName, std::string folder);
 
 private:
 	void initFrameVAO();

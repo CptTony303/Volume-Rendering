@@ -12,6 +12,7 @@
 #include <imgui.h>
 #include <core/Scenes/volumeScene.h>
 #include <filesystem>
+#include <GLFW/stb_image_write.h>
 
 
 void Renderer::init() {
@@ -321,13 +322,17 @@ void Renderer::setStepSize(float stepSize)
 
 void Renderer::setControlVariate()
 {
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers[CONTROL_VARIATE].getID());
 	glBlitFramebuffer( 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	controlVariate.transferFunctionColor = transferFunctions[COLOR];
 	controlVariate.transferFunctionDensity = transferFunctions[TRANSPARENCY];
 	controlVariate.volumePosition = scene.getVolumePosition();
 	isControlVariateSet = true;
+}
+
+void Renderer::deleteControlVariate()
+{
+	isControlVariateSet = false;
 }
 
 void Renderer::setUseControlVariate(bool useIt)
@@ -348,4 +353,13 @@ glm::mat4 Renderer::getCameraPosition()
 glm::mat4 Renderer::getVolumePosition()
 {
 	return scene.getVolumePosition();
+}
+void Renderer::saveImageToFile(std::string fileName, std::string folder)
+{
+	int* buffer = new int[width * height * 3];
+	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+	stbi_flip_vertically_on_write(1);
+	std::string fullPath;
+	fullPath.append(folder).append(fileName).append(".png");
+	stbi_write_png(fullPath.c_str(), width, height, 3, buffer, width * 3);
 }

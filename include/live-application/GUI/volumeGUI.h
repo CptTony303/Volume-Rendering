@@ -11,11 +11,23 @@ public:
 	void renderGUI();
 	std::vector<float> getTransferFunction(int type);
 
+	void renderPicturesTab();
+
+	void renderControlVariateTab();
+
+	void renderSettingsTab();
+
 	int methode = 0;
 	float stepSize = 0.01f;
 	int samplesPerFrame = 5;
 	float brightness = 10.f;
-	bool reset_accumulation_frames;
+	bool reset_accumulation_frames = false;
+	bool use_control_variate = false;
+	bool set_control_variate = false;
+	bool delete_control_variate = false;
+	int sample_number_for_control_variate = 60;
+	bool run_test_cases = false;
+	bool save_picture = false;
 private:
 	void renderMethodeTab();
 	void transferFunctionTab();

@@ -15,7 +15,9 @@ void VolumeGUI::renderGUI()
 	ImGui::Begin("Volume Renderer Settings");
 	if (ImGui::BeginTabBar("##TabBar"))
 	{
-		renderMethodeTab();
+		//renderMethodeTab();
+		renderPicturesTab();
+		renderControlVariateTab();
 		transferFunctionTab();
 		aboutTab();
 
@@ -43,7 +45,50 @@ std::vector<float> VolumeGUI::getTransferFunction(int type)
 	}
 	return transferFunction;
 }
-
+void VolumeGUI::renderPicturesTab() {
+	if (ImGui::BeginTabItem("Pictures"))
+	{
+		save_picture = false;
+		if (ImGui::Button("Save current picture"))
+		{
+			save_picture = true;
+		}
+		ImGui::SameLine();
+		run_test_cases = false;
+		if (ImGui::Button("Run test cases"))
+		{
+			run_test_cases = true;
+		}
+		ImGui::EndTabItem();
+	}
+}
+void VolumeGUI::renderControlVariateTab() {
+	if (ImGui::BeginTabItem("Control variate"))
+	{
+		ImGui::Checkbox("Use control variate", &use_control_variate);
+		if (use_control_variate) {
+			ImGui::RadioButton("manual", &methode, 0); ImGui::SameLine();
+			ImGui::RadioButton("auto", &methode, 1);
+		if (methode == 0) {
+			set_control_variate = false;
+			if (ImGui::Button("Set control variate"))
+			{
+				set_control_variate = true;
+			}
+			ImGui::SameLine();
+			delete_control_variate = false;
+			if (ImGui::Button("Delete control variate"))
+			{
+				delete_control_variate = true;
+			}
+		}
+		if (methode == 1) {
+			ImGui::SliderInt("\nSet sample number for control variate:", &sample_number_for_control_variate, 60, 1000);
+		}
+		}
+		ImGui::EndTabItem();
+	}
+}
 void VolumeGUI::renderMethodeTab()
 {
 	if (ImGui::BeginTabItem("render methode"))

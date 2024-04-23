@@ -4,8 +4,8 @@
 
 // am besten mit argument für entweder live app oder tester
 int main() {
-	Tester();
-	//LiveApplication().start();
+	//Tester();
+	LiveApplication().start();
 	//Window* window = Window::getInstance(); // window nur für live app
 	//window->initWindow();
 	//window->startRenderLoop();
