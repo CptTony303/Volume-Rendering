@@ -273,7 +273,7 @@ void Renderer::accumulateFrames()
 	glBindVertexArray(FrameVAO);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[ACCUMULATION].getID());
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	shaders[ACC].use();
@@ -287,7 +287,7 @@ void Renderer::accumulateFrames()
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[LAST_FRAME].getID());
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	shaders[COPY].use();
@@ -298,7 +298,7 @@ void Renderer::accumulateFrames()
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -326,7 +326,7 @@ void Renderer::setControlVariate()
 	glBindVertexArray(FrameVAO);
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers[CONTROL_VARIATE].getID());
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	shaders[COPY].use();

@@ -14,7 +14,7 @@
 
 void Tester::generateTestImages() {
 	glm::mat4 m_0(1.f);
-	//glm::mat4 m_1(glm::rotate(m_0, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
+	glm::mat4 m_1(glm::rotate(m_0, glm::radians(45.f), glm::vec3(1.f, 1.f, 0.f)));
 
 	std::vector<float> x  = { 0.0,0.0,1.0,1.0 };
 	std::vector<float> y = { 0.0, 0.1, 1.0, 0.9 };
@@ -24,6 +24,17 @@ void Tester::generateTestImages() {
 	std::vector<float> b = { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 };
 	//std::vector<float> c = { 0.0,0.0, 0.3, 0.0,0.5,0.3 , 0.7, 0.0 , 1.0,1.0 };
 
+	renderer->setVolumePosition(m_1);
+
+	runSingleTestcase(x, a, 1,
+		Renderer::MONTE_CARLO, false,
+		false, true, "x - a - 20s - no - m1");
+	runSingleTestcase(x, a, 6,
+		Renderer::MONTE_CARLO, false,
+		true, true, "x - a - 120s - no - m1");
+	runSingleTestcase(x, a, 1,
+		Renderer::MONTE_CARLO, true,
+		false, true, "x - a  - 20s - xa120 - m1");
 
 	renderer->setVolumePosition(m_0);
 

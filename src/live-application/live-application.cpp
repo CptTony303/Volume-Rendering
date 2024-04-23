@@ -37,20 +37,21 @@ void LiveApplication::start()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-	glfw_window = glfwCreateWindow(width, height, "Volume Renderer", NULL, NULL);
+	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+	glfw_window = glfwCreateWindow(mode->width, mode->height, "Volume Renderer", NULL, NULL);
 	if (!glfw_window) {
 		// Fehlerbehandlung: Das Fenster konnte nicht erstellt werden
 		glfwTerminate();
 		return;
 	}
 
-	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-	const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+	
 	glfwSetWindowMonitor(glfw_window, primaryMonitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 
 
 	glfwMakeContextCurrent(glfw_window);
-	//glfwGetFramebufferSize(glfw_window, &width, &height);
+	glfwGetFramebufferSize(glfw_window, &width, &height);
 	//glViewport(0, 0, width, height);
 	//set callback functions
 

@@ -3,10 +3,12 @@
 out vec4 FragColor;
 
 in vec3 modelPos; //intersection with cube in model position
-in vec2 lastFrameCoord;
 
 uniform mat4 model; //model matrix
 uniform mat4 view; //view matrix
+
+uniform float screenSize_x;
+uniform float screenSize_y;
 
 uniform sampler3D volume; //texture of the volume
 uniform int numberOfColorPoints;
@@ -240,7 +242,8 @@ void main(){
     
 
     if(useControlVariate){
-        h0 = texture(convergedFrame, lastFrameCoord).rgb;
+        vec2 coords = vec2(gl_FragCoord.x/screenSize_x, gl_FragCoord.y/screenSize_y);
+        h0 = texture(convergedFrame, coords).rgb;
     }
 
     int sample_nr = 0;
@@ -301,25 +304,29 @@ void main(){
         if (var_f_star.x < eps || var_f1.x < eps){
             weights_x = vec2(0.5);
         }
-//        if (cov_f_star_f1.x < eps){
-//            weights_x = vec2(0.5);
+//        if (abs(f_star.x - f1.x) < eps){
+//            weights_x = vec2(1.f, 0.f);
 //        }
+
         vec2 weights_y = (e * covMat_f1_f_star_y_inverse) / dot(e * covMat_f1_f_star_y_inverse, e);
         if (var_f_star.y < eps || var_f1.y < eps){
             weights_y = vec2(0.5);
         }
-//        if (cov_f_star_f1.y < eps){
-//            weights_y = vec2(0.5);
+//        if (abs(f_star.y - f1.y) < eps){
+//            weights_y = vec2(1.f, 0.f);
 //        }
+
         vec2 weights_z = (e * covMat_f1_f_star_z_inverse) / dot(e * covMat_f1_f_star_z_inverse, e);
         if (var_f_star.z < eps || var_f1.z < eps){
             weights_z = vec2(0.5);
         }
-//        if (cov_f_star_f1.z < eps){
-//            weights_z = vec2(0.5);
+//        if (abs(var_f_star.z - var_f1.z) < eps){
+//            weights_z = vec2(0.5f);
 //        }
+
         vec3 weight_f1 = vec3(weights_x.x,weights_y.x,weights_z.x);
         vec3 weight_f_star = vec3(weights_x.y,weights_y.y,weights_z.y);
+
         F = weight_f1 * f1 + weight_f_star * f_star;
 
 //        F = (weight_f1 + e3 * weights.x )/2  * f1 + (weight_f_star + e3 * weights.y )/2 * f_star;
