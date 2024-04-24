@@ -10,6 +10,7 @@
 #include <filesystem>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <GLFW/stb_image_write.h>
+//#include <Flip/FLIP.h>
 
 
 void Tester::generateTestImages() {
@@ -24,17 +25,24 @@ void Tester::generateTestImages() {
 	std::vector<float> b = { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 };
 	//std::vector<float> c = { 0.0,0.0, 0.3, 0.0,0.5,0.3 , 0.7, 0.0 , 1.0,1.0 };
 
-	renderer->setVolumePosition(m_1);
+	//renderer->setVolumePosition(m_1);
 
-	runSingleTestcase(x, a, 1,
-		Renderer::MONTE_CARLO, false,
-		false, true, "x - a - 20s - no - m1");
-	runSingleTestcase(x, a, 6,
-		Renderer::MONTE_CARLO, false,
-		true, true, "x - a - 120s - no - m1");
-	runSingleTestcase(x, a, 1,
-		Renderer::MONTE_CARLO, true,
-		false, true, "x - a  - 20s - xa120 - m1");
+	//runSingleTestcase(x, a, 1,
+	//	Renderer::MONTE_CARLO, false,
+	//	false, true, "x - a - 20s - no - m1");
+	//runSingleTestcase(x, a, 6,
+	//	Renderer::MONTE_CARLO, false,
+	//	true, true, "x - a - 120s - no - m1");
+	//runSingleTestcase(x, a, 1,
+	//	Renderer::MONTE_CARLO, true,
+	//	false, true, "x - a  - 20s - xa120 - m1");
+
+	//std::string testImage;
+	//testImage.append(resultsFolder).append(currentFolder).append("x - a - 20s - no").append(".png");
+	//std::string refImage;
+	//refImage.append(resultsFolder).append(currentFolder).append("x - a - 120s - no").append(".png");
+	//FLIP::image refImg(refImage);
+	//FLIP::evaluate(refImage, testImage, false, [], 1.f);
 
 	renderer->setVolumePosition(m_0);
 

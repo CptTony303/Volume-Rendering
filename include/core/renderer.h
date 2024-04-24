@@ -57,6 +57,7 @@ public:
 private:
 	void initFrameVAO();
 	void initFBOs();
+	void initVolumeFBO();
 	void initTransferFunctions();
 	void initShaders();
 	void initVolumeShaders();

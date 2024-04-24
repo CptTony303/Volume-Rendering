@@ -190,13 +190,45 @@ void VolumeGUI::functionEditor(int type)
 	ImGuiIO& io = ImGui::GetIO();
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
 	if (type == 0) {
-		ImU32 col_a = ImGui::GetColorU32(IM_COL32(255, 0, 0, 255));
-		ImU32 col_b = ImGui::GetColorU32(IM_COL32(0, 255, 0, 255));
-		ImU32 col_c = ImGui::GetColorU32(IM_COL32(0, 0, 255, 255));
-		ImVec2 canvas_p1_1 = ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + canvas_sz.y / 2);
-		ImVec2 canvas_p0_2 = ImVec2(canvas_p0.x, canvas_p0.y + canvas_sz.y / 2);
-		draw_list->AddRectFilledMultiColor(canvas_p0, canvas_p1_1, col_a, col_a, col_b, col_b);
-		draw_list->AddRectFilledMultiColor(canvas_p0_2, canvas_p1, col_b, col_b, col_c, col_c);
+
+	// Vertikaler Farbverlauf für HSV (Hue: 0-60, Saturation: 1, Value: 1) nach RGB
+		draw_list->AddRectFilledMultiColor(canvas_p0, ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + canvas_sz.y / 6.0f),
+			ImGui::GetColorU32(IM_COL32(255, 0, 0, 255)),
+			ImGui::GetColorU32(IM_COL32(255, 0, 0, 255)),
+			ImGui::GetColorU32(IM_COL32(255, 0, 255, 255)),
+			ImGui::GetColorU32(IM_COL32(255, 0, 255, 255)));
+		// Vertikaler Farbverlauf für HSV (Hue: 60-120, Saturation: 1, Value: 1) nach RGB
+		draw_list->AddRectFilledMultiColor(ImVec2(canvas_p0.x, canvas_p0.y + canvas_sz.y / 6.0f), ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + 2 * canvas_sz.y / 6.0f),
+
+			ImGui::GetColorU32(IM_COL32(255, 0, 255, 255)),
+			ImGui::GetColorU32(IM_COL32(255, 0, 255, 255)),
+			ImGui::GetColorU32(IM_COL32(0, 0, 255, 255)),
+			ImGui::GetColorU32(IM_COL32(0, 0, 255, 255)));
+		// Vertikaler Farbverlauf für HSV (Hue: 120-180, Saturation: 1, Value: 1) nach RGB
+		draw_list->AddRectFilledMultiColor(ImVec2(canvas_p0.x, canvas_p0.y + 2 * canvas_sz.y / 6.0f), ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + 3 * canvas_sz.y / 6.0f),
+
+			ImGui::GetColorU32(IM_COL32(0, 0, 255, 255)),
+			ImGui::GetColorU32(IM_COL32(0, 0, 255, 255)),
+		ImGui::GetColorU32(IM_COL32(0, 255, 255, 255)),
+			ImGui::GetColorU32(IM_COL32(0, 255, 255, 255)));
+		// Vertikaler Farbverlauf für HSV (Hue: 180-240, Saturation: 1, Value: 1) nach RGB
+		draw_list->AddRectFilledMultiColor(ImVec2(canvas_p0.x, canvas_p0.y + 3 * canvas_sz.y / 6.0f), ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + 4 * canvas_sz.y / 6.0f),
+			ImGui::GetColorU32(IM_COL32(0, 255, 255, 255)),
+			ImGui::GetColorU32(IM_COL32(0, 255, 255, 255)),
+			ImGui::GetColorU32(IM_COL32(0, 255, 0, 255)),
+			ImGui::GetColorU32(IM_COL32(0, 255, 0, 255)));
+		// Vertikaler Farbverlauf für HSV (Hue: 240-300, Saturation: 1, Value: 1) nach RGB
+		draw_list->AddRectFilledMultiColor(ImVec2(canvas_p0.x, canvas_p0.y + 4 * canvas_sz.y / 6.0f), ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + 5 * canvas_sz.y / 6.0f),
+			ImGui::GetColorU32(IM_COL32(0, 255, 0, 255)),
+			ImGui::GetColorU32(IM_COL32(0, 255, 0, 255)),
+			ImGui::GetColorU32(IM_COL32(255, 255, 0, 255)),
+			ImGui::GetColorU32(IM_COL32(255, 255, 0, 255)));
+		// Vertikaler Farbverlauf für HSV (Hue: 300-360, Saturation: 1, Value: 1) nach RGB
+		draw_list->AddRectFilledMultiColor(ImVec2(canvas_p0.x, canvas_p0.y + 5 * canvas_sz.y / 6.0f), ImVec2(canvas_p0.x + canvas_sz.x, canvas_p0.y + canvas_sz.y),
+			ImGui::GetColorU32(IM_COL32(255, 255, 0, 255)),
+			ImGui::GetColorU32(IM_COL32(255, 255, 0, 255)),
+			ImGui::GetColorU32(IM_COL32(255, 0, 0, 255)),
+			ImGui::GetColorU32(IM_COL32(255, 0, 0, 255)));
 	}
 	if (type == 1) {
 		ImU32 col_a = ImGui::GetColorU32(IM_COL32(255, 255, 255, 255));

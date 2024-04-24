@@ -66,10 +66,14 @@ void Renderer::initFrameVAO() // soll in renderer
 void Renderer::initFBOs() // belongs to renderer
 {
 	framebuffers.resize(4);
-	framebuffers[VOLUME] = Framebuffer(width, height);
+	initVolumeFBO();
+	framebuffers[VOLUME] = Framebuffer(width, height, 6);
 	framebuffers[ACCUMULATION] = Framebuffer(width, height);
 	framebuffers[LAST_FRAME] = Framebuffer(width, height);
 	framebuffers[CONTROL_VARIATE] = Framebuffer(width, height);
+}
+void Renderer::initVolumeFBO() {
+	
 }
 void Renderer::initTransferFunctions()
 {
@@ -194,9 +198,9 @@ void Renderer::updateShaderValues() // in renderer
 		shaders[ACC].setInt("runs", accumulatedFrames);
 		shaders[ACC].setInt("samplesPerRun", samplesPerFrame);
 
-		glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture());
+		glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture()[0]);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, framebuffers[CONTROL_VARIATE].getTexture());
+		glBindTexture(GL_TEXTURE_2D, framebuffers[CONTROL_VARIATE].getTexture()[0]);
 		break;
 		/*
 	case DEBUG:
@@ -279,10 +283,10 @@ void Renderer::accumulateFrames()
 	shaders[ACC].use();
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture());
+	glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture()[0]);
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, framebuffers[LAST_FRAME].getTexture());
+	glBindTexture(GL_TEXTURE_2D, framebuffers[LAST_FRAME].getTexture()[0]);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -293,7 +297,7 @@ void Renderer::accumulateFrames()
 	shaders[COPY].use();
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, framebuffers[ACCUMULATION].getTexture());
+	glBindTexture(GL_TEXTURE_2D, framebuffers[ACCUMULATION].getTexture()[0]);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -332,7 +336,7 @@ void Renderer::setControlVariate()
 	shaders[COPY].use();
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, framebuffers[ACCUMULATION].getTexture());
+	glBindTexture(GL_TEXTURE_2D, framebuffers[ACCUMULATION].getTexture()[0]);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 

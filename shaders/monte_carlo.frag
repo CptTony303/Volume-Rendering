@@ -1,6 +1,14 @@
 #version 330 core
 
-out vec4 FragColor;
+layout(location = 0) out vec4 F;
+layout(location = 1) out vec4 Fs;
+layout(location = 2) out vec4 F1;
+layout(location = 3) out vec4 H1;
+layout(location = 4) out vec4 H0;
+layout(location = 5) out vec4 CovFH;
+
+layout(location = 6) out vec4 Facc;
+
 
 in vec3 modelPos; //intersection with cube in model position
 
@@ -32,6 +40,9 @@ vec3 color_h1;
 vec3 variance_f1;
 vec3 variance_h1;
 vec3 covariance_f1_h1;
+
+//#define PI 3.1415926538
+bool use_hsv = true;
 
 
 /*BEGIN simple substitution for rng*/
@@ -126,10 +137,32 @@ vec3 transferFunctionColor(float value){
             }
         }
     }
-    color -= 0.5;
-    float red = color > 0 ? color * 2.f : 0;
-    float green = 1.f - 2.f* abs(color);
-    float blue = color < 0 ? color * -2.f : 0;;
+    float red;
+    float green;
+    float blue;
+    
+        color *= 6;
+        int c = int(color);
+        color = 1.f - abs(mod(color, 2.f) - 1.f );
+        float one = 1.f;
+        if (c % 2 == 1){
+            one = color;
+            color = 1.f;
+        }
+        c %= 6;
+        if(c < 2){
+            red = one;
+            green = color;
+            blue = 0.f;
+        }else if(c < 4){
+            red = 0.f;
+            green = one;
+            blue = color;
+        }else{
+            red = color;
+            green = 0.f;
+            blue = one;
+        }
     return vec3(red, green, blue);
 }
 vec3 transferFunctionControlColor(float value){
@@ -150,22 +183,53 @@ vec3 transferFunctionControlColor(float value){
             }
         }
     }
-    color -= 0.5;
-    float red = color > 0 ? color * 2.f : 0;
-    float green = 1.f - 2.f* abs(color);
-    float blue = color < 0 ? color * -2.f : 0;;
+    float red;
+    float green;
+    float blue;
+    
+        color *= 6;
+        int c = int(color);
+        color = 1.f - abs(mod(color, 2.f) - 1.f );
+        float one = 1.f;
+        if (c % 2 == 1){
+            one = color;
+            color = 1.f;
+        }
+        c %= 6;
+        if(c < 2){
+            red = one;
+            green = color;
+            blue = 0.f;
+        }else if(c < 4){
+            red = 0.f;
+            green = one;
+            blue = color;
+        }else{
+            red = color;
+            green = 0.f;
+            blue = one;
+        }
     return vec3(red, green, blue);
 }
 
+vec4 color_to_physical(vec4 tf) {
+    // conversion of tf values to physical units:
+    vec3 unit_emission = tf.rgb;
+    float unit_opacity = tf.a;
+    float unit_transmittance = 1.0 - unit_opacity;
+//float unit_transmittance = unit_opacity;
+    float eps = 1e-8;
+    float mu_t = -log(clamp(unit_transmittance, eps, 1.0 - eps));
+    vec3 Le = (unit_opacity > eps) ? (unit_emission / unit_opacity) : vec3(0.0);
+    return vec4(Le, mu_t);
+}
+
 void deltaTracking(vec3 w){
-    int samplesPerDeltaStep = 10;
-    float minimum_percentage = 0.9;
-    float lower_precision_treshold = 0.5;
     int n = 0;
 
     vec3 x = modelPos;
-    float mu = brightness;
-    float scale_factor = 1.3;
+    float scale_factor = 0.5;
+    float mu = brightness * scale_factor;
 
     float weight = 1.f;
     float weightControl = 1.f;
@@ -178,6 +242,7 @@ void deltaTracking(vec3 w){
 
 //    for(int n = 0; n < samplesPerDeltaStep; n++){
 //    while(sumW < minimum_percentage && (!useControlVariate || sumV < minimum_percentage)){
+    while(true){
 
         float rng1 = get_random_float();
 
@@ -186,8 +251,13 @@ void deltaTracking(vec3 w){
 
         vec3 texCoord = x+vec3(0.5f);
         float volumeData = texture(volume, texCoord).r;
-        float density = transferFunctionDensity(volumeData)*scale_factor*mu;
+        float density = transferFunctionDensity(volumeData);//*brightness;
         vec3 fi = transferFunctionColor(volumeData);
+
+        vec4 real_color = color_to_physical(vec4 (fi,density));
+        fi = real_color.rgb;
+        density = real_color.a;
+
         float mu_n = mu - density;
         float Pa = density / (density + abs(mu_n));
         float Pn = abs(mu_n)/(density + abs(mu_n));
@@ -198,11 +268,16 @@ void deltaTracking(vec3 w){
 
         if(useControlVariate){
         vec3 hi = transferFunctionControlColor(volumeData);
-        float densityControl = transferFunctionControlDensity(volumeData)*scale_factor*mu;
+        float densityControl = transferFunctionControlDensity(volumeData);//*brightness;
+
+        vec4 real_color_control = color_to_physical(vec4 (hi,densityControl));
+        hi = real_color_control.rgb;
+        densityControl = real_color_control.a;
+
         float mu_n_control = mu - densityControl;
         float Pn_control = abs(mu_n_control)/(densityControl + abs(mu_n_control));
         float Pa_control = densityControl / (densityControl + abs(mu_n_control));
-        float vi = weightControl * (densityControl/mu);
+        float vi = weightControl * Pa_control;
         sumV += vi;
 
         color_h1 += vi * hi; 
@@ -213,11 +288,11 @@ void deltaTracking(vec3 w){
             break;
         }
     }
-    color_f1 /= sumW;
-    color_h1 /= sumV;
-    if(sumV < lower_precision_treshold){
-        color_h1 = vec3(0.f);
-    }
+//    color_f1 /= sumW;
+//    color_h1 /= sumV;
+//    if(sumV < lower_precision_treshold){
+//        color_h1 = vec3(0.f);
+//    }
 }
 
 
@@ -276,7 +351,7 @@ void main(){
         }
     }
     f1 /= samplesPerFrame;
-    FragColor = vec4(f1,1.f);
+    F = vec4(f1,1.f);
     if(useControlVariate){
         h1 /= samplesPerFrame;
         f1_h1 /= samplesPerFrame;
@@ -298,7 +373,7 @@ void main(){
         mat2 covMat_f1_f_star_y_inverse = inverse(mat2(var_f1.y, cov_f_star_f1.y, cov_f_star_f1.y, var_f_star.y));
         mat2 covMat_f1_f_star_z_inverse = inverse(mat2(var_f1.z, cov_f_star_f1.z, cov_f_star_f1.z, var_f_star.z));
 
-        vec3 F;
+        vec3 f;
         vec2 e = vec2(1.0);
         float eps = 0.00001;
 
@@ -311,39 +386,32 @@ void main(){
         if (abs(var_f_star.x) < eps || abs(var_f1.x) < eps){
             weights_x = vec2(0.5);
         }
-        if (abs(f_star.x) < eps){
-            weights_x = vec2(1.f, 0.f);
-        }
 
         vec2 weights_y = (e * covMat_f1_f_star_y_inverse) / dot(e * covMat_f1_f_star_y_inverse, e);
         if (abs(var_f_star.y) < eps || abs(var_f1.y) < eps){
             weights_y = vec2(0.5);
-        }
-        if (abs(f_star.y) < eps){
-            weights_y = vec2(1.f, 0.f);
         }
 
         vec2 weights_z = (e * covMat_f1_f_star_z_inverse) / dot(e * covMat_f1_f_star_z_inverse, e);
         if (abs(var_f_star.z) < eps || abs(var_f1.z) < eps){
             weights_z = vec2(0.5);
         }
-        if (abs(f_star.z) < eps){
-            weights_z = vec2(1.f,0.f);
-        }
 
         vec3 weight_f1 = vec3(weights_x.x,weights_y.x,weights_z.x);
         vec3 weight_f_star = vec3(weights_x.y,weights_y.y,weights_z.y);
 
 //        F = weights.x * f1 + weights.y * f_star;
-        F = weight_f1 * f1 + weight_f_star * f_star;
+        f = weight_f1 * f1 + weight_f_star * f_star;
 //        F = (weight_f1 + e3 * weights.x )/2  * f1 + (weight_f_star + e3 * weights.y )/2 * f_star;
 
-        FragColor = clamp(vec4(F, 1.f), 0.0, 1.0);
-        return;
+        F = clamp(vec4(f, 1.f), 0.0, 1.0);
+        Fs = vec4(f_star,1.f);
+        F1 = vec4(f1,1.f);
+        H1 = vec4(h1,1.f);
+        H0 = vec4(0.f);
+        CovFH = vec4(cov_f1_h1, 1.f);
 
-        FragColor = vec4(f1,1.f);
-        FragColor = vec4(h1,1.f);
-        FragColor = vec4(f1_h1,1.f);
+        Facc = vec4(0.f);
 //        FragColor = vec4(f_star,1.f);
 //        FragColor = vec4(var_f1,1.f);
 //        FragColor = vec4(var_f_star,1.f);
