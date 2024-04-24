@@ -177,7 +177,8 @@ void deltaTracking(vec3 w){
     float sumV = 0.f;
 
 //    for(int n = 0; n < samplesPerDeltaStep; n++){
-    while(sumW < minimum_percentage && (!useControlVariate || sumV < minimum_percentage)){
+//    while(sumW < minimum_percentage && (!useControlVariate || sumV < minimum_percentage)){
+
         float rng1 = get_random_float();
 
         float t = - log (1 - rng1)/mu;
