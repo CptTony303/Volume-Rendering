@@ -10,7 +10,7 @@
 #include <core/framebuffer.h>
 #include <vector>
 #include <core/texture3D.h>
-
+#include <json/json.hpp>
 class Renderer
 {
 public:
@@ -52,7 +52,10 @@ public:
 	glm::mat4 getCameraPosition();
 	glm::mat4 getVolumePosition();
 
+	void saveDataToFile(std::string folder);
+
 	void saveImageToFile(std::string fileName, std::string folder);
+
 
 private:
 	void initFrameVAO();
@@ -73,6 +76,7 @@ private:
 		std::vector <float> transferFunctionColor;
 		std::vector <float> transferFunctionDensity;
 		glm::mat4 volumePosition;
+		int runs;
 	};
 
 	int width, height;
@@ -91,5 +95,62 @@ private:
 	bool isControlVariateSet;
 	ControlVariate controlVariate;
 };
-
+using json = nlohmann::json;
+class JSONSerializer {
+public:
+	// Funktion zum Speichern der Daten
+	void saveData(const std::vector<float>& transferFunctionColor,
+		const std::vector<float>& transferFunctionDensity,
+		const std::vector<float>& transferFunctionColor_CV,
+		const std::vector<float>& transferFunctionDensity_CV,
+		const int &runs,
+		const int& runs_CV,
+		const glm::mat4& volumePosition,
+		const std::string& filename) {
+		json data;
+		data["transferFunctionColor"] = transferFunctionColor;
+		data["transferFunctionDensity"] = transferFunctionDensity;
+		data["volumePosition"] = {
+			{volumePosition[0][0], volumePosition[0][1], volumePosition[0][2], volumePosition[0][3]},
+			{volumePosition[1][0], volumePosition[1][1], volumePosition[1][2], volumePosition[1][3]},
+			{volumePosition[2][0], volumePosition[2][1], volumePosition[2][2], volumePosition[2][3]},
+			{volumePosition[3][0], volumePosition[3][1], volumePosition[3][2], volumePosition[3][3]}
+		};
+		data["runs_CV"] = runs;
+		data["transferFunctionColor_CV"] = transferFunctionColor_CV;
+		data["transferFunctionDensity_CV"] = transferFunctionDensity_CV;
+		data["runs_CV"] = runs_CV;
+		std::ofstream file(filename);
+		file << data.dump(4); // pretty-print mit 4 Leerzeichen Einrückung
+	}
+	// Funktion zum Laden der Daten
+	void loadData(std::vector<float>& transferFunctionColor,
+		std::vector<float>& transferFunctionDensity,
+		std::vector<float>& transferFunctionColor_CV,
+		std::vector<float>& transferFunctionDensity_CV,
+		int& runs,
+		int& runs_CV,
+		glm::mat4& volumePosition,
+		const std::string& filename) {
+		std::ifstream file(filename);
+		if (!file) {
+			std::cerr << "Fehler beim Öffnen der Datei: " << filename << std::endl;
+			return;
+		}
+		json data;
+		file >> data;
+		transferFunctionColor = data["transferFunctionColor"].get<std::vector<float>>();
+		transferFunctionDensity = data["transferFunctionDensity"].get<std::vector<float>>();
+		transferFunctionColor_CV = data["transferFunctionColor_CV"].get<std::vector<float>>();
+		transferFunctionDensity_CV = data["transferFunctionDensity_CV"].get<std::vector<float>>();
+		runs_CV = data["runs_CV"].get<int>();
+		runs = data["runs_CV"].get<int>();
+		// Rückrechnung von std::vector<std::vector<float>> zu glm::mat4
+		auto matData = data["volumePosition"];
+		//volumePosition = glm::mat4(matData[0][0], matData[0][1], matData[0][2], matData[0][3],
+		//	matData[1][0], matData[1][1], matData[1][2], matData[1][3],
+		//	matData[2][0], matData[2][1], matData[2][2], matData[2][3],
+		//	matData[3][0], matData[3][1], matData[3][2], matData[3][3]);
+	}
+};
 #endif // !RENDERER_H

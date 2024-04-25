@@ -14,7 +14,7 @@ Framebuffer::Framebuffer(int width, int height, int numberOfColorAttachments) {
 	/*unsigned int boundTexture;
 	glGet(GL_TEXTURE_BINDING_2D);*/
 	// generate texture
-	for (int i = 0; i <= numberOfColorAttachments; i++) {
+	for (int i = 0; i < numberOfColorAttachments; i++) {
 
 	unsigned int texture;
 	glActiveTexture(GL_TEXTURE0);

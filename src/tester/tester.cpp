@@ -24,105 +24,37 @@ void Tester::generateTestImages() {
 	std::vector<float> a = { 0.0,0.0, 0.07, 0.0 ,1.0,1.0 };
 	std::vector<float> b = { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 };
 	//std::vector<float> c = { 0.0,0.0, 0.3, 0.0,0.5,0.3 , 0.7, 0.0 , 1.0,1.0 };
-
-	//renderer->setVolumePosition(m_1);
-
-	//runSingleTestcase(x, a, 1,
-	//	Renderer::MONTE_CARLO, false,
-	//	false, true, "x - a - 20s - no - m1");
-	//runSingleTestcase(x, a, 6,
-	//	Renderer::MONTE_CARLO, false,
-	//	true, true, "x - a - 120s - no - m1");
-	//runSingleTestcase(x, a, 1,
-	//	Renderer::MONTE_CARLO, true,
-	//	false, true, "x - a  - 20s - xa120 - m1");
-
-	//std::string testImage;
-	//testImage.append(resultsFolder).append(currentFolder).append("x - a - 20s - no").append(".png");
-	//std::string refImage;
-	//refImage.append(resultsFolder).append(currentFolder).append("x - a - 120s - no").append(".png");
-	//FLIP::image refImg(refImage);
-	//FLIP::evaluate(refImage, testImage, false, [], 1.f);
-
-	renderer->setVolumePosition(m_0);
-
-	runSingleTestcase(x , a, 1,
-		Renderer::MONTE_CARLO, false,
-		false, true, "x - a - 20s - no");
-	runSingleTestcase(x, a, 6,
-		Renderer::MONTE_CARLO, false,
-		true, true, "x - a - 120s - no");
-	runSingleTestcase(x, a, 1,
-		Renderer::MONTE_CARLO, true,
-		false, true, "x - a  - 20s - xa120");
-
-	runSingleTestcase(y, a, 1,
-		Renderer::MONTE_CARLO, false,
-		false, true, "y - a  - 20s - no");
-	runSingleTestcase(y, a, 1,
-		Renderer::MONTE_CARLO, true,
-		false, true, "y - a  - 20s - xa120");
-	runSingleTestcase(y, a, 6,
-		Renderer::MONTE_CARLO, false,
-		false, true, "y - a  - 120s - no");
-
-	//runSingleTestcase(z, a, 1,
-	//	Renderer::MONTE_CARLO, false,
-	//	false, true, "z - a  - 20s - no");
-	//runSingleTestcase(z, a, 1,
-	//	Renderer::MONTE_CARLO, true,
-	//	false, true, "z - a  - 20s - xa120");
-	//runSingleTestcase(z, a, 6,
-	//	Renderer::MONTE_CARLO, false,
-	//	false, true, "z - a - 120s - no");
-
-	runSingleTestcase(x, b, 1,
-		Renderer::MONTE_CARLO, false,
-		false, true, "x - b - 20s - no");
-	runSingleTestcase(x, b, 1,
-		Renderer::MONTE_CARLO, true,
-		false, true, "x - b - 20s - xa120");
-	runSingleTestcase(x, b, 6,
-		Renderer::MONTE_CARLO, false,
-		true, true, "x - b - 120s - no");
-	runSingleTestcase(x, a, 1,
-		Renderer::MONTE_CARLO, true,
-		false, true, "x - a - 20s - xb120");
-
-	//renderer->setVolumeData(Texture3D("./Assets/vis_male_128x256x256_uint8.raw",glm::vec3(128,256,256)));
-	//renderer->setVolumePosition(m_1);
-	//runSingleTestcase(x, a, 6,
-	//	Renderer::MONTE_CARLO, false,
-	//	false, true, "Head - x - a  - 120s - no");
-	//runSingleTestcase(x, b, 6,
-	//	Renderer::MONTE_CARLO, false,
-	//	false, true, "Head - x - b  - 120s - no");
-	//runSingleTestcase(x, c, 6,
-	//	Renderer::MONTE_CARLO, false,
-	//	false, true, "Head - x - c  - 120s - no");
+	int count = 0;
+	runSingleTestcase(x, a, x, a, 1, 12, std::to_string(count++), m_0);
+	runSingleTestcase(x, a, y, a, 1, 12, std::to_string(count++), m_0);
+	runSingleTestcase(x, b, x, a, 1, 12, std::to_string(count++), m_0);
+	runSingleTestcase(x, a, x, b, 1, 12, std::to_string(count++), m_0);
 }
 
-void Tester::runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity, int nrOfRendersteps,
-		Renderer::RenderMethods renderMethod, bool useControlVariate,
-		bool setControlVariate, bool saveImageToFile, std::string imageName) {
+void Tester::runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity,
+	std::vector<float> transferFunctionColor_CV, std::vector<float> transferFunctionDensity_CV,
+	int nrOfRendersteps, int nrOfRendersteps_CV,
+		std::string test_case, glm::mat4 volumePosition) {
+	renderer->setVolumePosition(volumePosition);
 	renderer->resetAccumulatedFrames();
-	renderer->setTransferFunction(transferFunctionColor, Renderer::COLOR);
-	renderer->setTransferFunction(transferFunctionDensity, Renderer::TRANSPARENCY);
-	renderer->setRenderMethod(renderMethod);
-	renderer->setUseControlVariate(useControlVariate);
+	renderer->setTransferFunction(transferFunctionColor_CV, Renderer::COLOR);
+	renderer->setTransferFunction(transferFunctionDensity_CV, Renderer::TRANSPARENCY);
+	renderer->setUseControlVariate(false);
 
 	for (int i = 0; i < nrOfRendersteps; i++) {
 		renderer->renderScene();
 	}
-
-	if (saveImageToFile) {
-		
-		saveImage(imageName);
+	renderer->setControlVariate();
+	renderer->setUseControlVariate(true);
+	renderer->resetAccumulatedFrames();
+	renderer->setTransferFunction(transferFunctionColor, Renderer::COLOR);
+	renderer->setTransferFunction(transferFunctionDensity, Renderer::TRANSPARENCY);
+	for (int i = 0; i < nrOfRendersteps; i++) {
+		renderer->renderScene();
 	}
-	if (setControlVariate) {
-		renderer->setControlVariate();
-	}
-	glfwSwapBuffers(glfw_window);
+	std::string newFolder = std::string().append(resultsFolder).append(currentFolder).append("/").append(test_case).append("/");
+	createDirectory(newFolder);
+	renderer->saveDataToFile(newFolder);
 }
 void Tester::saveImage(std::string fileName)
 {

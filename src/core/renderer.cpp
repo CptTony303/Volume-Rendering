@@ -67,13 +67,13 @@ void Renderer::initFBOs() // belongs to renderer
 {
 	framebuffers.resize(4);
 	initVolumeFBO();
-	framebuffers[VOLUME] = Framebuffer(width, height, 6);
+	framebuffers[VOLUME] = Framebuffer(width, height, 5);
 	framebuffers[ACCUMULATION] = Framebuffer(width, height);
 	framebuffers[LAST_FRAME] = Framebuffer(width, height);
 	framebuffers[CONTROL_VARIATE] = Framebuffer(width, height);
 }
 void Renderer::initVolumeFBO() {
-	
+
 }
 void Renderer::initTransferFunctions()
 {
@@ -165,7 +165,7 @@ void Renderer::updateShaderValues() // in renderer
 		shaders[RM].setMat4("view", scene.getCameraView());
 		shaders[RM].setMat4("projection", scene.getCameraProjection());
 		shaders[RM].setFloat("stepSize", stepSize);
-		shaders[RM].setInt("numberOfColorPoints", transferFunctions[COLOR].size()/2);
+		shaders[RM].setInt("numberOfColorPoints", transferFunctions[COLOR].size() / 2);
 		shaders[RM].setListVec2("transfer_function_color", transferFunctions[COLOR]);
 		shaders[RM].setInt("numberOfDensityPoints", transferFunctions[TRANSPARENCY].size() / 2);
 		shaders[RM].setListVec2("transfer_function_density", transferFunctions[TRANSPARENCY]);
@@ -192,7 +192,7 @@ void Renderer::updateShaderValues() // in renderer
 		shaders[MC].setListVec2("transfer_function_control_color", controlVariate.transferFunctionColor);
 		shaders[MC].setInt("lastNumberOfDensityPoints", controlVariate.transferFunctionDensity.size() / 2);
 		shaders[MC].setListVec2("transfer_function_control_density", controlVariate.transferFunctionDensity);
-		shaders[MC].setBool("useControlVariate", useControlVariate&&isControlVariateSet);
+		shaders[MC].setBool("useControlVariate", useControlVariate && isControlVariateSet);
 
 		shaders[ACC].use();
 		shaders[ACC].setInt("runs", accumulatedFrames);
@@ -216,7 +216,7 @@ void Renderer::updateShaderValues() // in renderer
 		volumeDebugShader.setMat4("projection", camera.getProjectionMatrix());
 		volumeDebugShader.setFloat("randomizer", (float)glfwGetTime());
 		volumeDebugShader.setInt("methode", gui.methode);
-		break; 
+		break;
 		*/
 	}
 }
@@ -230,7 +230,7 @@ void Renderer::renderVolume() // in renderer
 {
 	glBindVertexArray(scene.getVolumeVAO());
 	glBindFramebuffer(GL_FRAMEBUFFER, 0); //draw on screen
-
+	method = MONTE_CARLO;
 	switch (method) {
 	case RAY_MARCHING:
 		accumulatedFrames = -1;
@@ -253,12 +253,18 @@ void Renderer::renderVolume() // in renderer
 		*/
 	}
 	glClearColor(0.f, 0.f, 0.f, 1.0f); //set clear color
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glEnable(GL_DEPTH_TEST);
 	//if (method != DEBUG) {
-
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	GLenum* drawBuffers = new GLenum[5];
+	for (int i = 0; i < 5; i++) {
+		drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+	}
+	//GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT6 };
+	glDrawBuffers(5, drawBuffers);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	glDrawBuffers(1, drawBuffers);
 	/*
 	}
 	else {
@@ -301,6 +307,7 @@ void Renderer::accumulateFrames()
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
+	//glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture()[4]);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -343,6 +350,7 @@ void Renderer::setControlVariate()
 	controlVariate.transferFunctionColor = transferFunctions[COLOR];
 	controlVariate.transferFunctionDensity = transferFunctions[TRANSPARENCY];
 	controlVariate.volumePosition = scene.getVolumePosition();
+	controlVariate.runs = accumulatedFrames;
 	isControlVariateSet = true;
 }
 
@@ -370,6 +378,35 @@ glm::mat4 Renderer::getVolumePosition()
 {
 	return scene.getVolumePosition();
 }
+void Renderer::saveDataToFile(std::string folder)
+{
+	JSONSerializer serializer;
+	serializer.saveData(
+		transferFunctions[COLOR], transferFunctions[TRANSPARENCY],
+		controlVariate.transferFunctionColor, controlVariate.transferFunctionDensity,
+		accumulatedFrames,
+		controlVariate.runs,
+		scene.getVolumePosition(),
+		std::string().append(folder).append("data.json"));
+
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[ACCUMULATION].getID());
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	saveImageToFile("F_ACC", folder);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[VOLUME].getID());
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	saveImageToFile("F", folder);
+	glReadBuffer(GL_COLOR_ATTACHMENT0+1);
+	saveImageToFile("F_STAR", folder);
+	glReadBuffer(GL_COLOR_ATTACHMENT0+2);
+	saveImageToFile("F1", folder);
+	glReadBuffer(GL_COLOR_ATTACHMENT0 + 3);
+	saveImageToFile("H1", folder);
+	glReadBuffer(GL_COLOR_ATTACHMENT0 + 4);
+	saveImageToFile("W_F_STAR", folder);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[CONTROL_VARIATE].getID());
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	saveImageToFile("CV", folder);
+}
 void Renderer::saveImageToFile(std::string fileName, std::string folder)
 {
 	int* buffer = new int[width * height * 3];
@@ -379,3 +416,7 @@ void Renderer::saveImageToFile(std::string fileName, std::string folder)
 	fullPath.append(folder).append(fileName).append(".png");
 	stbi_write_png(fullPath.c_str(), width, height, 3, buffer, width * 3);
 }
+
+
+
+

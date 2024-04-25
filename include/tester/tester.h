@@ -16,9 +16,11 @@ public:
 	};
 	void generateTestImages();
 private:
-	void runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity, int nrOfRendersteps,
-		Renderer::RenderMethods renderMethod, bool useControlVariate,
-		bool setControlVariate, bool saveImageToFile, std::string imageName);
+	void runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity, 
+		std::vector<float> transferFunctionColor_CV, std::vector<float> transferFunctionDensity_CV, 
+		int nrOfRendersteps, int nrOfRendersteps_CV, 
+		std::string test_case);
+	void runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity, std::vector<float> transferFunctionColor_CV, std::vector<float> transferFunctionDensity_CV, int nrOfRendersteps, int nrOfRendersteps_CV, std::string test_case, glm::mat4 volumePosition);
 	void saveImage(std::string fileName);
 	void init();
 	std::string getCurrentTimeAsString();

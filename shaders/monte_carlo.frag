@@ -4,10 +4,8 @@ layout(location = 0) out vec4 F;
 layout(location = 1) out vec4 Fs;
 layout(location = 2) out vec4 F1;
 layout(location = 3) out vec4 H1;
-layout(location = 4) out vec4 H0;
-layout(location = 5) out vec4 CovFH;
+layout(location = 4) out vec4 CovFH;
 
-layout(location = 6) out vec4 Facc;
 
 
 in vec3 modelPos; //intersection with cube in model position
@@ -408,17 +406,6 @@ void main(){
         Fs = vec4(f_star,1.f);
         F1 = vec4(f1,1.f);
         H1 = vec4(h1,1.f);
-        H0 = vec4(0.f);
-        CovFH = vec4(cov_f1_h1, 1.f);
-
-        Facc = vec4(0.f);
-//        FragColor = vec4(f_star,1.f);
-//        FragColor = vec4(var_f1,1.f);
-//        FragColor = vec4(var_f_star,1.f);
-//        FragColor = vec4(cov_f_star_f1,1.f);
-
-//        FragColor = vec4(dot(cov_f1_h1, e3)/3.f*100,0,0,1);
-//        FragColor = vec4(weights.x,0,0,1);
-//        FragColor = vec4(weights.y,0,0,1);
+        CovFH = vec4( weight_f_star , 1.0);
     }
 }
