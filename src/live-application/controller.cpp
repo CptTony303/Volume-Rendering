@@ -44,6 +44,12 @@ bool Controller::processInput(float delta)
 	if (glfwGetKey(glfw_window, GLFW_KEY_D) == GLFW_PRESS) {
 		translation.z -= 1;
 	}
+	if (glfwGetKey(glfw_window, GLFW_KEY_Q) == GLFW_PRESS) {
+		translation.z += 1;
+	}
+	if (glfwGetKey(glfw_window, GLFW_KEY_E) == GLFW_PRESS) {
+		translation.z -= 1;
+	}
 	if (glm::length(translation) > 0.1) {
 		modified = true;
 		translation = glm::normalize(translation);
