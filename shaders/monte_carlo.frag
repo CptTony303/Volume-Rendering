@@ -406,6 +406,6 @@ void main(){
         Fs = vec4(f_star,1.f);
         F1 = vec4(f1,1.f);
         H1 = vec4(h1,1.f);
-        CovFH = vec4( weight_f_star , 1.0);
+        CovFH = vec4( weight_f_star * f_star, 1.0);
     }
 }

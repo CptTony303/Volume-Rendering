@@ -1,0 +1,10 @@
+README.md
+pyproject.toml
+setup.py
+flip/__init__.py
+flip/main.cpp
+flip/main.py
+flip.egg-info/PKG-INFO
+flip.egg-info/SOURCES.txt
+flip.egg-info/dependency_links.txt
+flip.egg-info/top_level.txt

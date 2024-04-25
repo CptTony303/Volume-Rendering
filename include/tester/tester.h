@@ -14,14 +14,12 @@ public:
 		resultsFolder("./../results/") {
 		init();
 	};
-	void generateTestImages();
+	glm::mat4 generateRandomRotationMatrix();
 private:
-	void runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity, 
-		std::vector<float> transferFunctionColor_CV, std::vector<float> transferFunctionDensity_CV, 
-		int nrOfRendersteps, int nrOfRendersteps_CV, 
-		std::string test_case);
+	void generateTestImages(int numberOfTestCases);
 	void runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity, std::vector<float> transferFunctionColor_CV, std::vector<float> transferFunctionDensity_CV, int nrOfRendersteps, int nrOfRendersteps_CV, std::string test_case, glm::mat4 volumePosition);
-	void saveImage(std::string fileName);
+	int randomInt(int min, int max);
+	std::vector<float> generateRandomTransferFunction(int numberOfSamplePoints);
 	void init();
 	std::string getCurrentTimeAsString();
 	bool createDirectory(const std::string& path);

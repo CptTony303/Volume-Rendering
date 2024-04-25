@@ -116,7 +116,7 @@ public:
 			{volumePosition[2][0], volumePosition[2][1], volumePosition[2][2], volumePosition[2][3]},
 			{volumePosition[3][0], volumePosition[3][1], volumePosition[3][2], volumePosition[3][3]}
 		};
-		data["runs_CV"] = runs;
+		data["runs"] = runs;
 		data["transferFunctionColor_CV"] = transferFunctionColor_CV;
 		data["transferFunctionDensity_CV"] = transferFunctionDensity_CV;
 		data["runs_CV"] = runs_CV;
