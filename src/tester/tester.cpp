@@ -111,16 +111,17 @@ void Tester::runSingleTestcase(std::vector<float> transferFunctionColor, std::ve
 	renderer->setRenderMethod(renderMethod);
 	renderer->setUseControlVariate(useControlVariate);
 
-	for (int i = 0; i < nrOfRendersteps; i++) {
+	for (int i = 0; i < nrOfRendersteps - 1; i++) {
 		renderer->renderScene();
 	}
+	if (setControlVariate) {
+		renderer->setControlVariate();
+	}
+	renderer->renderScene();
 
 	if (saveImageToFile) {
 		
 		saveImage(imageName);
-	}
-	if (setControlVariate) {
-		renderer->setControlVariate();
 	}
 	glfwSwapBuffers(glfw_window);
 }

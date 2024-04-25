@@ -29,7 +29,8 @@ public:
 		samplesPerFrame(10),
 		transferFunctions(2),
 		useControlVariate(false),
-		isControlVariateSet(false){
+		isControlVariateSet(false),
+		setControlVariateFlag(false) {
 	}
 	void renderScene();
 	void renderVolume();
@@ -89,6 +90,7 @@ private:
 	std::vector <std::vector <float> > transferFunctions;
 	bool useControlVariate;
 	bool isControlVariateSet;
+	bool setControlVariateFlag;
 	ControlVariate controlVariate;
 };
 

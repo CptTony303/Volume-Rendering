@@ -6,7 +6,6 @@ layout(location = 2) out vec4 F1;
 layout(location = 3) out vec4 H1;
 layout(location = 4) out vec4 H0;
 layout(location = 5) out vec4 CovFH;
-
 layout(location = 6) out vec4 Facc;
 
 
@@ -30,10 +29,15 @@ uniform int lastNumberOfDensityPoints;
 uniform vec2 transfer_function_control_density[100];
 uniform sampler2D convergedFrame;
 uniform bool useControlVariate;
+uniform bool setControlVariate;
+uniform bool isControlVariateSet;
+
+uniform sampler2D lastFrame;
 
 uniform float brightness;
 uniform int samplesPerFrame;
 uniform float randomizer;
+uniform int runs;
 
 vec3 color_f1;
 vec3 color_h1;
@@ -320,10 +324,10 @@ void main(){
     vec3 cov_f1_h1 = vec3(0.f);
     vec3 cov_f1_f_star = vec3(0.f);
     
-
-    if(useControlVariate){
-        vec2 coords = vec2(gl_FragCoord.x/screenSize_x, gl_FragCoord.y/screenSize_y);
-        h0 = texture(convergedFrame, coords).rgb;
+    if(isControlVariateSet){
+    vec2 coords = vec2(gl_FragCoord.x/screenSize_x, gl_FragCoord.y/screenSize_y);
+    h0 = texture(convergedFrame, coords).rgb;
+        
     }
 
     int sample_nr = 0;
@@ -408,17 +412,17 @@ void main(){
         Fs = vec4(f_star,1.f);
         F1 = vec4(f1,1.f);
         H1 = vec4(h1,1.f);
-        H0 = vec4(0.f);
         CovFH = vec4(cov_f1_h1, 1.f);
 
-        Facc = vec4(0.f);
-//        FragColor = vec4(f_star,1.f);
-//        FragColor = vec4(var_f1,1.f);
-//        FragColor = vec4(var_f_star,1.f);
-//        FragColor = vec4(cov_f_star_f1,1.f);
-
-//        FragColor = vec4(dot(cov_f1_h1, e3)/3.f*100,0,0,1);
-//        FragColor = vec4(weights.x,0,0,1);
-//        FragColor = vec4(weights.y,0,0,1);
+    }
+    H0 = vec4(h0, 1.f);
+    Facc = F;
+    if(runs >= 1){
+            vec2 coords = vec2(gl_FragCoord.x/screenSize_x, gl_FragCoord.y/screenSize_y);
+            Facc = F + texture(lastFrame, coords) * runs;
+            Facc /= runs+1;
+    }
+    if(setControlVariate){
+            H0 = Facc;
     }
 }

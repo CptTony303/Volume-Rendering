@@ -11,6 +11,8 @@
 #include <live-application/GUI/volumeGUI.h>
 #include <live-application/controller.h>
 #include <tester/tester.h>
+#include <chrono>
+#include <thread>
 
 //Window* Window::window = NULL;
 //Window::Window() {
@@ -122,22 +124,24 @@ void LiveApplication::start()
 			renderer->deleteControlVariate();
 		}
 		renderer->setUseControlVariate(gui.use_control_variate);
-		if (gui.run_test_cases) {
-			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
-			break;
-		}
 
 		renderer->renderScene();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+		if (gui.run_test_cases) {
+			glfwSetWindowShouldClose(glfw_window, true);
+		}
+
 		glfwSwapBuffers(glfw_window);
+		//glfwPollEvents();
 	}
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+	//ImGui_ImplOpenGL3_Shutdown();
+	//ImGui_ImplGlfw_Shutdown();
+	//ImGui::DestroyContext();
+	glfwDestroyWindow(glfw_window);
 	glfwTerminate();
+	//std::this_thread::sleep_for(std::chrono::seconds(1));
 	if (gui.run_test_cases) {
 		Tester();
 	}

@@ -5,6 +5,7 @@
 Framebuffer::Framebuffer(int width, int height, int numberOfColorAttachments) {
 
 	TEXTURE = new unsigned int[numberOfColorAttachments];
+	GLenum * drawBuffers = new GLenum(numberOfColorAttachments);
 
 	unsigned int local_id;
 	glGenFramebuffers(1, &local_id);
@@ -14,7 +15,7 @@ Framebuffer::Framebuffer(int width, int height, int numberOfColorAttachments) {
 	/*unsigned int boundTexture;
 	glGet(GL_TEXTURE_BINDING_2D);*/
 	// generate texture
-	for (int i = 0; i <= numberOfColorAttachments; i++) {
+	for (int i = 0; i < numberOfColorAttachments; i++) {
 
 	unsigned int texture;
 	glActiveTexture(GL_TEXTURE0);
@@ -27,7 +28,10 @@ Framebuffer::Framebuffer(int width, int height, int numberOfColorAttachments) {
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+i, GL_TEXTURE_2D, texture, 0);
 	TEXTURE[i] = texture;
+	drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
 	}
+	//GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT6 };
+	glDrawBuffers(numberOfColorAttachments, drawBuffers);
 	// generate depthbuffer
 	unsigned int depthbuffer;
 	glGenTextures(1, &depthbuffer);

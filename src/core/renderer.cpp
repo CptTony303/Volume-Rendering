@@ -66,14 +66,10 @@ void Renderer::initFrameVAO() // soll in renderer
 void Renderer::initFBOs() // belongs to renderer
 {
 	framebuffers.resize(4);
-	initVolumeFBO();
-	framebuffers[VOLUME] = Framebuffer(width, height, 6);
+	framebuffers[VOLUME] = Framebuffer(width, height, 7);
 	framebuffers[ACCUMULATION] = Framebuffer(width, height);
-	framebuffers[LAST_FRAME] = Framebuffer(width, height);
+	framebuffers[LAST_FRAME] = Framebuffer(width, height, 2);
 	framebuffers[CONTROL_VARIATE] = Framebuffer(width, height);
-}
-void Renderer::initVolumeFBO() {
-	
 }
 void Renderer::initTransferFunctions()
 {
@@ -103,6 +99,7 @@ void Renderer::initVolumeShaders() // in renderer
 
 	shaders[MC].setInt("volume", 0);
 	shaders[MC].setInt("convergedFrame", 1);
+	shaders[MC].setInt("lastFrame", 2);
 
 	const char* vertPathRayMarch = "./shaders/volume.vert";
 	const char* fragPathRayMarch = "./shaders/ray_marching.frag";
@@ -132,7 +129,8 @@ void Renderer::initCopyShader() // in renderer
 	shaders[COPY] = Shader(vertPath, fragPath);
 	shaders[COPY].use();
 
-	shaders[COPY].setInt("screenTexture", 0);
+	shaders[COPY].setInt("lastFrameTexture", 0);
+	shaders[COPY].setInt("cvTexture", 1);
 }
 
 void Renderer::initDebugShaders() // in renderer
@@ -159,17 +157,17 @@ void Renderer::updateShaderValues() // in renderer
 	glBindTexture(GL_TEXTURE_3D, scene.getVolumeData());
 
 	switch (method) {
-	case RAY_MARCHING:
-		shaders[RM].use();
-		shaders[RM].setMat4("model", scene.getVolumePosition());
-		shaders[RM].setMat4("view", scene.getCameraView());
-		shaders[RM].setMat4("projection", scene.getCameraProjection());
-		shaders[RM].setFloat("stepSize", stepSize);
-		shaders[RM].setInt("numberOfColorPoints", transferFunctions[COLOR].size()/2);
-		shaders[RM].setListVec2("transfer_function_color", transferFunctions[COLOR]);
-		shaders[RM].setInt("numberOfDensityPoints", transferFunctions[TRANSPARENCY].size() / 2);
-		shaders[RM].setListVec2("transfer_function_density", transferFunctions[TRANSPARENCY]);
-		break;
+		//case RAY_MARCHING:
+		//	shaders[RM].use();
+		//	shaders[RM].setMat4("model", scene.getVolumePosition());
+		//	shaders[RM].setMat4("view", scene.getCameraView());
+		//	shaders[RM].setMat4("projection", scene.getCameraProjection());
+		//	shaders[RM].setFloat("stepSize", stepSize);
+		//	shaders[RM].setInt("numberOfColorPoints", transferFunctions[COLOR].size()/2);
+		//	shaders[RM].setListVec2("transfer_function_color", transferFunctions[COLOR]);
+		//	shaders[RM].setInt("numberOfDensityPoints", transferFunctions[TRANSPARENCY].size() / 2);
+		//	shaders[RM].setListVec2("transfer_function_density", transferFunctions[TRANSPARENCY]);
+		//	break;
 	case MONTE_CARLO:
 		shaders[MC].use();
 		shaders[MC].setMat4("model", scene.getVolumePosition());
@@ -192,15 +190,23 @@ void Renderer::updateShaderValues() // in renderer
 		shaders[MC].setListVec2("transfer_function_control_color", controlVariate.transferFunctionColor);
 		shaders[MC].setInt("lastNumberOfDensityPoints", controlVariate.transferFunctionDensity.size() / 2);
 		shaders[MC].setListVec2("transfer_function_control_density", controlVariate.transferFunctionDensity);
-		shaders[MC].setBool("useControlVariate", useControlVariate&&isControlVariateSet);
+		shaders[MC].setBool("useControlVariate", useControlVariate && isControlVariateSet);
+		shaders[MC].setBool("setControlVariate", setControlVariateFlag); 
+		shaders[MC].setBool("isControlVariateSet", isControlVariateSet);
+		setControlVariateFlag = false;
 
-		shaders[ACC].use();
-		shaders[ACC].setInt("runs", accumulatedFrames);
-		shaders[ACC].setInt("samplesPerRun", samplesPerFrame);
+		shaders[MC].setInt("runs", accumulatedFrames);
 
-		glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture()[0]);
+
+		//glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture()[0]);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, framebuffers[CONTROL_VARIATE].getTexture()[0]);
+		glBindTexture(GL_TEXTURE_2D, framebuffers[LAST_FRAME].getTexture()[1]);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, framebuffers[LAST_FRAME].getTexture()[0]);
+
+		//shaders[ACC].use();
+		//shaders[ACC].setInt("runs", accumulatedFrames);
+		//shaders[ACC].setInt("samplesPerRun", samplesPerFrame);
 		break;
 		/*
 	case DEBUG:
@@ -216,7 +222,7 @@ void Renderer::updateShaderValues() // in renderer
 		volumeDebugShader.setMat4("projection", camera.getProjectionMatrix());
 		volumeDebugShader.setFloat("randomizer", (float)glfwGetTime());
 		volumeDebugShader.setInt("methode", gui.methode);
-		break; 
+		break;
 		*/
 	}
 }
@@ -257,14 +263,45 @@ void Renderer::renderVolume() // in renderer
 
 	glEnable(GL_DEPTH_TEST);
 	//if (method != DEBUG) {
+	GLenum* drawBuffers = new GLenum[7];
+	for (int i = 0; i < 7; i++) {
+		drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+	}
+	//GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT6 };
+	glDrawBuffers(7, drawBuffers);
 
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	/*
 	}
 	else {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 	*/
+
+	glDisable(GL_DEPTH_TEST);
+	glBindVertexArray(FrameVAO);
+
+	shaders[COPY].use();
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture()[6]);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, framebuffers[VOLUME].getTexture()[4]);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[LAST_FRAME].getID());
+	glDrawBuffers(2, drawBuffers);
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDrawBuffers(1, drawBuffers);
+	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	accumulatedFrames++;
+	return;
 
 	if (method == MONTE_CARLO) {
 		accumulateFrames();
@@ -326,24 +363,11 @@ void Renderer::setStepSize(float stepSize)
 
 void Renderer::setControlVariate()
 {
-	glDisable(GL_DEPTH_TEST);
-	glBindVertexArray(FrameVAO);
-
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers[CONTROL_VARIATE].getID());
-	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	shaders[COPY].use();
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, framebuffers[ACCUMULATION].getTexture()[0]);
-
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
 	controlVariate.transferFunctionColor = transferFunctions[COLOR];
 	controlVariate.transferFunctionDensity = transferFunctions[TRANSPARENCY];
 	controlVariate.volumePosition = scene.getVolumePosition();
 	isControlVariateSet = true;
+	setControlVariateFlag = true;
 }
 
 void Renderer::deleteControlVariate()
