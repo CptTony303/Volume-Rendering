@@ -16,7 +16,7 @@ public:
 	};
 	glm::mat4 generateRandomRotationMatrix();
 private:
-	void generateTestImages(int numberOfTestCases);
+	void generateTestImages();
 	void runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity, std::vector<float> transferFunctionColor_CV, std::vector<float> transferFunctionDensity_CV, int nrOfRendersteps, int nrOfRendersteps_CV, std::string test_case, glm::mat4 volumePosition);
 	int randomInt(int min, int max);
 	std::vector<float> generateRandomTransferFunction(int numberOfSamplePoints);

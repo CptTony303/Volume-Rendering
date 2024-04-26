@@ -4,68 +4,71 @@ import flip
 import cv2
 import numpy as np
 
-def compare_images(reference_path, test_path):
-    # Berechnung des FLIP-Fehlers und der Parameter
-    flipErrorMap, meanFLIPError, parameters = flip.evaluate(reference_path, test_path, "LDR")
-
-    # Berechnung des MSE
-    mse = meanFLIPError ** 2
-
-    # Speichern des MSE in einer Datei
-    mse_file = test_path.replace(".png", "_mse.txt")
-    with open(mse_file, "w") as f:
-        f.write(str(mse))
-
-    # Speichern des Differenzbildes
-    diff_image_path = test_path.replace(".png", "_diff.png")
-    flip.save(diff_image_path, flipErrorMap)
-
 
 # Funktion zum Speichern des meanFLIPError in eine Textdatei
-def save_mean_flip_error(mean_flip_error, scaled_mse, results_folder, filename):
+def save_mean_flip_error(mean_flip_error, results_folder, filename):
     output_path = os.path.join(results_folder, filename)
-    mse = mean_flip_error ** 2
     with open(output_path, "w") as file:
-        file.write("mean flip error"+str(mean_flip_error)+"\n")
-        file.write("mse: "+str(mse)+"\n")
-        file.write("scaled mse: "+str(scaled_mse)+"\n")
-    print(f"Mean FLIP Error wurde in '{output_path}' gespeichert.")
+        file.write(str(mean_flip_error))
 
-if __name__ == '__main__':
-    # Definition der Kommandozeilenargumente
-    parser = argparse.ArgumentParser(description="Calculate FLIP error and save difference images for images in subfolders.")
-    parser.add_argument("root_folder", type=str, help="Path to the root folder containing subfolders with images to compare.")
+def berechne_gradienten_gewichtungen(bild):
+    # Konvertiere das Bild in Graustufen
+    graustufen = cv2.cvtColor(bild, cv2.COLOR_BGR2GRAY)
 
-    # Parsing der Kommandozeilenargumente
-    args = parser.parse_args()
+    # Berechne Gradienten in x- und y-Richtung
+    gradientX = cv2.Sobel(graustufen, cv2.CV_64F, 1, 0, ksize=3)
+    gradientY = cv2.Sobel(graustufen, cv2.CV_64F, 0, 1, ksize=3)
 
+    # Berechne die Magnitude des Gradienten
+    gradientMagnitude = np.sqrt(gradientX**2 + gradientY**2)
+
+    # Normalisiere den Gradienten auf den Bereich [0, 1]
+    weightMap = gradientMagnitude / np.max(gradientMagnitude)
+
+    return weightMap
+
+def compare_all_testcases(root_folder):
     # Durchlaufen aller Unterordner im Stammverzeichnis
-    for subdir in os.listdir(args.root_folder):
-        subdir_path = os.path.join(args.root_folder, subdir)
+    for subdir in os.listdir(root_folder):
+        subdir_path = os.path.join(root_folder, subdir)
         output_folder = os.path.join(subdir_path, "flip")
         os.makedirs(output_folder, exist_ok=True)
         if os.path.isdir(subdir_path):
             # Durchlaufen aller Dateien im Unterordner
-            for filename in os.listdir(subdir_path):
-                if filename.endswith(".png"):
+            files = ["F_STAR.png", "F1.png", "F.png", "CV.png", "H1.png"]
+            ref = os.path.join(subdir_path, "F_ACC.png")
+            for filename in files:
                     # Vergleich der Bilder, wenn es sich um F.png, F_STAR.png oder F1.png handelt
-                    if filename.startswith("F") and filename.endswith(".png"):
-                        if(filename == "F_ACC.png"):
-                            continue
-                        ref = os.path.join(subdir_path, "F_ACC.png")
-                        test = os.path.join(subdir_path, filename)
-                        try:
-                            flipErrorMap, meanFLIPError, parameters = flip.evaluate(ref, test, "LDR")
-                        except RuntimeError as e:
-                            print(f"Error evaluating FLIP for {filename}: {e}")
-                            continue 
-                        save_png = filename.replace(".png", "_diff.png")
-                        mse = meanFLIPError ** 2
-                        scaled_flipErrorMap = (flipErrorMap ** 2 - flipErrorMap.min() ** 2) / (flipErrorMap.max() ** 2 - flipErrorMap.min() ** 2) * 255
-                        scaled_flipErrorMap = scaled_flipErrorMap.astype(np.uint8)
-                        cv2.imwrite(os.path.join(output_folder,save_png), scaled_flipErrorMap)
-                        save_mse = filename.replace(".png", "_mse.txt")
-                        scaled_flipError = (meanFLIPError ** 2 - flipErrorMap.min() ** 2) / (flipErrorMap.max() ** 2 - flipErrorMap.min() ** 2)
-                        save_mean_flip_error(meanFLIPError,scaled_flipError, output_folder, save_mse)
-                        #print(f"FLIP error map saved to {output_path}")
+                test = os.path.join(subdir_path, filename)
+                try:
+                    flipErrorMap, meanFLIPError, parameters = flip.evaluate(ref, test, "LDR")
+                    if filename == "H1.png":
+                        flipErrorMap, meanFLIPError, parameters = flip.evaluate(os.path.join(subdir_path, "CV.png"), test, "LDR")
+                except RuntimeError as e:
+                    print(f"Error evaluating FLIP for {filename}: {e}")
+                    continue 
+                save_png = filename.replace(".png", "_diff.png")
+                scaled_flipErrorMap = (flipErrorMap **2 - flipErrorMap.min() **2) / (flipErrorMap.max() **2 - flipErrorMap.min() **2) * 255
+                scaled_flipErrorMap = scaled_flipErrorMap.astype(np.uint8)
+                # weighted_flipErrorMap = flipErrorMap
+                cv2.imwrite(os.path.join(output_folder,save_png), scaled_flipErrorMap)
+                # cv2.imwrite(os.path.join(output_folder,save_png), flipErrorMap)
+                save_mfe = filename.replace(".png", "_mfe.txt")
+                save_mean_flip_error(meanFLIPError, output_folder, save_mfe)
+    
                         
+if __name__ == '__main__':
+    # Definition der Kommandozeilenargumente
+    parser = argparse.ArgumentParser(description="Calculate FLIP error and save difference images for images in subfolders.")
+    parser.add_argument("root_folder", type=str, help="Path to the root folder containing subfolders with images to compare.")
+    parser.add_argument("-r", "--recursive", action="store_true", help="Setzen Sie dieses Flag, um die Schleife durchlaufen zu lassen.")
+    
+
+    # Parsing der Kommandozeilenargumente
+    args = parser.parse_args()
+    if args.recursive == True:
+        for root, dirs, files in os.walk(args.root_folder):
+            for dir in dirs:
+                compare_all_testcases(os.path.join(root, dir))
+    else:
+        compare_all_testcases(args.root_folder)

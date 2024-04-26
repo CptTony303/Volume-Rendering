@@ -13,30 +13,133 @@
 #include <random>
 //#include <Flip/FLIP.h>
 
-void Tester::generateTestImages(int numberOfTestCases) {
+void Tester::generateTestImages() {
 
+	Texture3D data_foot("./Assets/foot_256x256x256_uint8.raw",glm::vec3(256));
+	Texture3D data_head("./Assets/vis_male_128x256x256_uint8.raw", glm::vec3(128, 256, 256));
+
+	std::string dataset_folder = currentFolder;
 
 	glm::mat4 m_0(1.f);
 	glm::mat4 m_1(glm::rotate(m_0, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
 	glm::mat4 m_2(glm::rotate(m_0, glm::radians(90.f), glm::vec3(0.f, 1.f, 0.f)));
-	renderer->setVolumeData(Texture3D("./Assets/vis_male_128x256x256_uint8.raw", glm::vec3(128, 256, 256)));
+
+	int numberOfTestCases = 10; 
+	int changeOfTransferFunction = 50;// the higher, the smaller the change. needs to be even.
+	renderer->setVolumeData(data_head);
+
+	currentFolder = std::string().append(dataset_folder).append("tf color changes");
+	createDirectory(currentFolder);
+	//color changed
 	for (int i = 0; i < numberOfTestCases; i++) {
-		runSingleTestcase(generateRandomTransferFunction(25), generateRandomTransferFunction(10),
-			generateRandomTransferFunction(25), generateRandomTransferFunction(10),
-			30, randomInt(1,30), std::to_string(i), i%2==0?m_1:m_2);
+		auto density = generateRandomTransferFunction(changeOfTransferFunction);
+		for (int i = 0; i < changeOfTransferFunction / 10 || i < 2; i++)
+		{
+			density[1 + 2 * i] = 0.f;
+		}
+		auto color1 = generateRandomTransferFunction(changeOfTransferFunction);
+		auto color2 = generateRandomTransferFunction(changeOfTransferFunction);
+		runSingleTestcase(color1, density,
+			color2, density,
+			30, 30, std::to_string(i), m_1);
+	}
+	currentFolder = std::string().append(dataset_folder).append("tf oppacity changes");
+	createDirectory(currentFolder);
+	//opaccity changed
+	for (int i = 0; i < numberOfTestCases; i++) {
+		auto density1 = generateRandomTransferFunction(changeOfTransferFunction);
+		auto density2 = generateRandomTransferFunction(changeOfTransferFunction);
+		for (int i = 0; i < changeOfTransferFunction/10 || i < 2; i++)
+		{
+			density1[1 + 2 * i] = 0.f;
+			density2[1 + 2 * i] = 0.f;
+		}
+		auto color = generateRandomTransferFunction(changeOfTransferFunction);
+		runSingleTestcase(color, density1,
+			color, density2,
+			30, 30, std::to_string(i), m_1);
+	}
+	currentFolder = std::string().append(dataset_folder).append("tf color and oppacity changes");
+	createDirectory(currentFolder);
+	//color and opaccity changed
+	for (int i = 0; i < numberOfTestCases; i++) {
+		auto density1 = generateRandomTransferFunction(changeOfTransferFunction);
+		auto density2 = generateRandomTransferFunction(changeOfTransferFunction);
+		for (int i = 0; i < changeOfTransferFunction/10 || i < 2; i++)
+		{
+			density1[1 + 2 * i] = 0.f;
+			density2[1 + 2 * i] = 0.f;
+		}
+		auto color1 = generateRandomTransferFunction(changeOfTransferFunction);
+		auto color2 = generateRandomTransferFunction(changeOfTransferFunction);
+		runSingleTestcase(color1, density1,
+			color2, density2,
+			30, 30, std::to_string(i), m_1);
+	}
+	currentFolder = std::string().append(dataset_folder).append("low quality cv");
+	createDirectory(currentFolder);
+	//low quality cv
+	for (int i = 0; i < numberOfTestCases; i++) {
+		auto density1 = generateRandomTransferFunction(changeOfTransferFunction);
+		auto density2 = generateRandomTransferFunction(changeOfTransferFunction);
+		for (int i = 0; i < changeOfTransferFunction/10 || i < 2; i++)
+		{
+			density1[1 + 2 * i] = 0.f;
+			density2[1 + 2 * i] = 0.f;
+		}
+		auto color1 = generateRandomTransferFunction(changeOfTransferFunction);
+		auto color2 = generateRandomTransferFunction(changeOfTransferFunction);
+		runSingleTestcase(color1, density1,
+			color2, density2,
+			30, randomInt(1, 3), std::to_string(i), m_1);
+	}
+	currentFolder = std::string().append(dataset_folder).append("different volume data");
+	createDirectory(currentFolder);
+	//different volume data
+	renderer->setVolumeData(data_foot);
+	for (int i = 0; i < numberOfTestCases; i++) {
+		auto density1 = generateRandomTransferFunction(changeOfTransferFunction);
+		auto density2 = generateRandomTransferFunction(changeOfTransferFunction);
+		for (int i = 0; i < changeOfTransferFunction/10 || i < 2; i++)
+		{
+			density1[1 + 2 * i] = 0.f;
+			density2[1 + 2 * i] = 0.f;
+		}
+		auto color1 = generateRandomTransferFunction(changeOfTransferFunction);
+		auto color2 = generateRandomTransferFunction(changeOfTransferFunction);
+		runSingleTestcase(color1, density1,
+			color2, density2,
+			30, 30, std::to_string(i), m_1);
 	}
 
-	//std::vector<float> x  = { 0.0,0.0,1.0,1.0 };
-	//std::vector<float> y = { 0.0, 0.1, 1.0, 0.9 };
-	////std::vector<float> z = { 0.0, 0.1, 1.0, 0.9 };
 
-	//std::vector<float> a = { 0.0,0.0, 0.07, 0.0 ,1.0,1.0 };
-	//std::vector<float> b = { 0.0,0.0, 0.3, 0.0 ,1.0,1.0 };
-	////std::vector<float> c = { 0.0,0.0, 0.3, 0.0,0.5,0.3 , 0.7, 0.0 , 1.0,1.0 };
-	//int count = 0;
-	//runSingleTestcase(x, a, x, a, 1, 12, std::to_string(count++), m_0);
-	//runSingleTestcase(x, a, y, a, 1, 12, std::to_string(count++), m_0);
-	//runSingleTestcase(x, b, x, a, 1, 12, std::to_string(count++), m_0);
+	//fps tests
+	//for (int i = 0; i < numberOfTestCases; i++) {
+	//	renderer->setVolumePosition(m_1);
+	//	renderer->resetAccumulatedFrames();
+	//	renderer->setTransferFunction(transferFunctionColor_CV, Renderer::COLOR);
+	//	renderer->setTransferFunction(transferFunctionDensity_CV, Renderer::TRANSPARENCY);
+	//	renderer->setUseControlVariate(false);
+
+	//	for (int i = 0; i < nrOfRendersteps_CV; i++) {
+	//		renderer->renderScene();
+	//		glfwSwapBuffers(glfw_window);
+	//	}
+	//	renderer->setControlVariate();
+	//	renderer->resetAccumulatedFrames();
+	//	renderer->setTransferFunction(transferFunctionColor, Renderer::COLOR);
+	//	renderer->setTransferFunction(transferFunctionDensity, Renderer::TRANSPARENCY);
+	//	for (int i = 0; i < nrOfRendersteps; i++) {
+	//		renderer->renderScene();
+	//		glfwSwapBuffers(glfw_window);
+	//	}
+	//	renderer->setUseControlVariate(true);
+	//	renderer->renderScene();
+	//	glfwSwapBuffers(glfw_window);
+	//	std::string newFolder = std::string().append(resultsFolder).append(currentFolder).append("/").append(test_case).append("/");
+	//	createDirectory(newFolder);
+	//	renderer->saveDataToFile(newFolder);
+	//}
 }
 
 void Tester::runSingleTestcase(std::vector<float> transferFunctionColor, std::vector<float> transferFunctionDensity,
@@ -90,9 +193,7 @@ int Tester::randomInt(int min, int max){
 	std::vector<float> transferFunction;
 
 	// Zufällige Werte für die Transferfunktion generieren
-	transferFunction.push_back(0.f);
-	transferFunction.push_back(0.f);
-	for (int i = 1; i < numberOfSamplePoints; ++i) {
+	for (int i = 0; i < numberOfSamplePoints; ++i) {
 		transferFunction.push_back(float(i)/float(numberOfSamplePoints-1));
 		transferFunction.push_back(dis(gen));
 	}
@@ -149,7 +250,7 @@ void Tester::init()
 	newFolder.append(resultsFolder).append(currentFolder);
 	createDirectory(newFolder);
 
-	this->generateTestImages(500);
+	this->generateTestImages();
 
 	glfwTerminate();
 }
