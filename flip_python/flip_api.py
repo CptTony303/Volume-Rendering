@@ -3,6 +3,7 @@ import os
 import flip
 import cv2
 import numpy as np
+import subprocess
 
 
 # Funktion zum Speichern des meanFLIPError in eine Textdatei
@@ -32,8 +33,8 @@ def compare_all_testcases(root_folder):
     for subdir in os.listdir(root_folder):
         subdir_path = os.path.join(root_folder, subdir)
         output_folder = os.path.join(subdir_path, "flip")
-        os.makedirs(output_folder, exist_ok=True)
         if os.path.isdir(subdir_path):
+            os.makedirs(output_folder, exist_ok=True)
             # Durchlaufen aller Dateien im Unterordner
             files = ["F_STAR.png", "F1.png", "F.png", "CV.png", "H1.png"]
             ref = os.path.join(subdir_path, "F_ACC.png")
@@ -55,6 +56,17 @@ def compare_all_testcases(root_folder):
                 # cv2.imwrite(os.path.join(output_folder,save_png), flipErrorMap)
                 save_mfe = filename.replace(".png", "_mfe.txt")
                 save_mean_flip_error(meanFLIPError, output_folder, save_mfe)
+
+    command = ['python', 'flip_eval.py', root_folder]
+
+    try:
+        # Execute the command
+        subprocess.run(command, check=True)
+        print("Statistics calculation completed successfully!")
+    except subprocess.CalledProcessError as e:
+        # Handle any error that occurred during subprocess execution
+        print(f"Error: {e}")
+        print("Statistics calculation failed.")
     
                         
 if __name__ == '__main__':
@@ -67,8 +79,9 @@ if __name__ == '__main__':
     # Parsing der Kommandozeilenargumente
     args = parser.parse_args()
     if args.recursive == True:
-        for root, dirs, files in os.walk(args.root_folder):
-            for dir in dirs:
-                compare_all_testcases(os.path.join(root, dir))
+        for item in os.listdir(args.root_folder):
+            item_path = os.path.join(args.root_folder, item)
+            if os.path.isdir(item_path):
+                compare_all_testcases(item_path)
     else:
         compare_all_testcases(args.root_folder)

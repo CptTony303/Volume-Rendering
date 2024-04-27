@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 def compute_mean_value(folder_path):
     # Dictionary to store mean values for each file
@@ -23,20 +24,22 @@ def compute_mean_value(folder_path):
 
     # Calculate the mean for each file
     mean_results = {}
+    var_results = {}
     for file, values in mean_values.items():
         mean_value = sum(values) / len(values)
-        mean_results[file] = mean_value
+        mean_results[file] = np.mean(mean_values[file])
+        var_results[file] = np.var(mean_values[file])
 
-    return mean_results
+    return (mean_results, var_results)
 
-def write_mean_values_to_file(mean_results, root_folder):
+def write_mean_values_to_file(mean_results, var_results, root_folder):
     # Create a new text file to store mean values
     output_file_path = os.path.join(root_folder, 'mean_values.txt')
 
     # Write mean values to the output file
     with open(output_file_path, 'w') as f:
         for file, mean_value in mean_results.items():
-            f.write(f'{file}: {mean_value}\n')
+            f.write(f'{file}: mean: {mean_value} - variance: {var_results[file]} \n')
 
 if __name__ == '__main__':
     import sys
@@ -50,9 +53,9 @@ if __name__ == '__main__':
     root_folder = sys.argv[1]
 
     # Compute mean values for files in 'flip' folders
-    mean_results = compute_mean_value(root_folder)
+    mean_results, var_results = compute_mean_value(root_folder)
 
     # Write mean values to a text file in the root folder
-    write_mean_values_to_file(mean_results, root_folder)
+    write_mean_values_to_file(mean_results, var_results, root_folder)
 
     print("Mean values written to mean_values.txt in the root folder.")
