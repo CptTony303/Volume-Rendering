@@ -107,7 +107,7 @@ void LiveApplication::start()
 
 	renderer->setVolumeData(Texture3D("./Assets/vis_male_128x256x256_uint8.raw", glm::vec3(128, 256, 256)));
 	glm::mat4 m_0(1.f);
-	//renderer->setVolumePosition(m_0);
+	renderer->setVolumePosition(m_0);
 	std::vector<float> x = { 0.0,0.0,1.0,1.0 };
 	renderer->setTransferFunction(x, Renderer::COLOR);
 	renderer->setTransferFunction(x, Renderer::TRANSPARENCY);
@@ -118,13 +118,7 @@ void LiveApplication::start()
 	controller.init(glfw_window, renderer);
 
 	float lastFrameTimestamp = glfwGetTime();
-		gui.reset_accumulation_frames = false;
-		//glm::mat4 m_0(1.f);
-		glm::mat4 m_1(glm::rotate(m_0, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
-		renderer->setVolumePosition(m_1);
 	while (!glfwWindowShouldClose(glfw_window)) {
-		renderer->setTransferFunction(gui.getTransferFunction(0), Renderer::COLOR);
-		renderer->setTransferFunction(gui.getTransferFunction(1), Renderer::TRANSPARENCY);
 		float currentFrameTimestamp = glfwGetTime();
 		float delta = currentFrameTimestamp - lastFrameTimestamp;
 		lastFrameTimestamp = currentFrameTimestamp;
@@ -144,6 +138,9 @@ void LiveApplication::start()
 		if (controller.processInput(delta) || gui.reset_accumulation_frames) {
 			renderer->resetAccumulatedFrames();
 		}
+		gui.reset_accumulation_frames = false;
+		renderer->setTransferFunction(gui.getTransferFunction(0), Renderer::COLOR);
+		renderer->setTransferFunction(gui.getTransferFunction(1), Renderer::TRANSPARENCY);
 
 		if (gui.set_control_variate) {
 			renderer->setControlVariate();
