@@ -26,6 +26,33 @@
 //	}
 //	return liveApp;
 //}
+std::string getCurrentTimeAsString() {
+	auto now = std::chrono::system_clock::now();
+	std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+
+	// Convert time to local time
+	std::tm* localTime = std::localtime(&currentTime);
+
+	// Format the time as a string
+	std::stringstream ss;
+	ss << std::put_time(localTime, "%Y-%m-%d %H-%M-%S");
+	return ss.str();
+}
+bool createDirectory(const std::string& path) {
+	try {
+		std::filesystem::create_directories(path);
+		return true;
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Error creating directory: " << e.what() << std::endl;
+		return false;
+	}
+}
+std::string newDir() {
+	auto dir = std::string("./../live-app/").append(getCurrentTimeAsString()).append("/");
+	createDirectory(dir);
+	return dir;
+}
 
 void LiveApplication::start()
 {
@@ -80,7 +107,7 @@ void LiveApplication::start()
 
 	renderer->setVolumeData(Texture3D("./Assets/vis_male_128x256x256_uint8.raw", glm::vec3(128, 256, 256)));
 	glm::mat4 m_0(1.f);
-	renderer->setVolumePosition(m_0);
+	//renderer->setVolumePosition(m_0);
 	std::vector<float> x = { 0.0,0.0,1.0,1.0 };
 	renderer->setTransferFunction(x, Renderer::COLOR);
 	renderer->setTransferFunction(x, Renderer::TRANSPARENCY);
@@ -90,6 +117,11 @@ void LiveApplication::start()
 	Controller controller = Controller();
 	controller.init(glfw_window, renderer);
 
+		gui.reset_accumulation_frames = false;
+		glm::mat4 m_1(glm::rotate(m_0, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
+		renderer->setVolumePosition(m_1);
+		renderer->setTransferFunction(gui.getTransferFunction(0), Renderer::COLOR);
+		renderer->setTransferFunction(gui.getTransferFunction(1), Renderer::TRANSPARENCY);
 	float lastFrameTimestamp = glfwGetTime();
 	while (!glfwWindowShouldClose(glfw_window)) {
 		float currentFrameTimestamp = glfwGetTime();
@@ -111,9 +143,6 @@ void LiveApplication::start()
 		if (controller.processInput(delta) || gui.reset_accumulation_frames) {
 			renderer->resetAccumulatedFrames();
 		}
-		gui.reset_accumulation_frames = false;
-		renderer->setTransferFunction(gui.getTransferFunction(0), Renderer::COLOR);
-		renderer->setTransferFunction(gui.getTransferFunction(1), Renderer::TRANSPARENCY);
 
 		if (gui.set_control_variate) {
 			renderer->setControlVariate();
@@ -122,6 +151,9 @@ void LiveApplication::start()
 			renderer->deleteControlVariate();
 		}
 		renderer->setUseControlVariate(gui.use_control_variate);
+		if (gui.save_picture) {
+			renderer->saveDataToFile(newDir());
+		}
 		if (gui.run_test_cases) {
 			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
