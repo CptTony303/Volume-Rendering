@@ -117,13 +117,14 @@ void LiveApplication::start()
 	Controller controller = Controller();
 	controller.init(glfw_window, renderer);
 
+	float lastFrameTimestamp = glfwGetTime();
 		gui.reset_accumulation_frames = false;
+		//glm::mat4 m_0(1.f);
 		glm::mat4 m_1(glm::rotate(m_0, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
 		renderer->setVolumePosition(m_1);
+	while (!glfwWindowShouldClose(glfw_window)) {
 		renderer->setTransferFunction(gui.getTransferFunction(0), Renderer::COLOR);
 		renderer->setTransferFunction(gui.getTransferFunction(1), Renderer::TRANSPARENCY);
-	float lastFrameTimestamp = glfwGetTime();
-	while (!glfwWindowShouldClose(glfw_window)) {
 		float currentFrameTimestamp = glfwGetTime();
 		float delta = currentFrameTimestamp - lastFrameTimestamp;
 		lastFrameTimestamp = currentFrameTimestamp;
